@@ -118,7 +118,6 @@ export const useToneStore = create<ToneState>()(
       
       saveTone: async (name: string, userId: string) => {
         try {
-          console.log('Starting save operation...', { name, userId });
           set({ loading: true, error: null });
           const { currentTone } = get();
           
@@ -136,7 +135,6 @@ export const useToneStore = create<ToneState>()(
           };
           
           if (currentTone.id) {
-            console.log('Updating existing tone:', currentTone.id);
             const { data, error } = await supabase
               .from('tone_profiles')
               .update(toneData)
@@ -144,13 +142,9 @@ export const useToneStore = create<ToneState>()(
               .select()
               .single();
             
-            if (error) {
-              console.error('Error updating tone:', error);
-              throw error;
-            }
+            if (error) throw error;
             
             if (data) {
-              console.log('Tone updated successfully:', data);
               set((state) => ({
                 savedTones: state.savedTones.map((tone) =>
                   tone.id === currentTone.id ? data : tone
@@ -160,20 +154,15 @@ export const useToneStore = create<ToneState>()(
               }));
             }
           } else {
-            console.log('Creating new tone');
             const { data, error } = await supabase
               .from('tone_profiles')
               .insert([{ ...toneData, user_id: userId }])
               .select()
               .single();
             
-            if (error) {
-              console.error('Error creating tone:', error);
-              throw error;
-            }
+            if (error) throw error;
             
             if (data) {
-              console.log('New tone created successfully:', data);
               set((state) => ({
                 savedTones: [...state.savedTones, data],
                 originalTone: data,
@@ -182,7 +171,6 @@ export const useToneStore = create<ToneState>()(
             }
           }
         } catch (error) {
-          console.error('Save operation failed:', error);
           set({ error: (error as Error).message });
           throw error;
         } finally {
@@ -310,7 +298,7 @@ export const useToneStore = create<ToneState>()(
             ...state.currentTone,
             ...traits,
           },
-          hasRegenerated: true,
+          hasRegenerated: false,
         }));
       },
       
@@ -341,7 +329,7 @@ export const useToneStore = create<ToneState>()(
           return hasRegenerated;
         }
         
-        return hasRegenerated || (
+        return hasRegenerated && (
           currentTone.formality !== originalTone.formality ||
           currentTone.brevity !== originalTone.brevity ||
           currentTone.humor !== originalTone.humor ||
