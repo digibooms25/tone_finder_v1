@@ -76,7 +76,7 @@ const ChatGPTGuide: React.FC = () => {
                 </ol>
                 <div className="bg-blue-50 p-6 rounded-xl">
                   <p className="text-blue-800">
-                    💡 Pro Tip: You can also add traits like "Chatty", "Witty", "Straight shooting", "Encouraging", or "Gen Z" to further customize the tone.
+                    💡 Pro Tip: You can combine your tone with ChatGPT's built-in traits like "Chatty", "Witty", "Straight shooting", "Encouraging", "Gen Z", "Skeptical", "Traditional", "Forward thinking", or "Poetic" for more nuanced responses.
                   </p>
                 </div>
               </div>
@@ -89,22 +89,18 @@ const ChatGPTGuide: React.FC = () => {
               </h2>
               <div className="space-y-4">
                 <p className="text-gray-700">
-                  For specific projects or tasks, incorporate your tone into the project context:
+                  For project-specific tone settings:
                 </p>
                 <ol className="list-decimal list-inside space-y-4 text-gray-700">
-                  <li>Start with a project description</li>
-                  <li>Include your tone prompt in the communication guidelines</li>
-                  <li>Add specific requirements or constraints</li>
-                  <li>Request your deliverables</li>
+                  <li>Create a new project in ChatGPT</li>
+                  <li>Click "Add instructions" in the project sidebar</li>
+                  <li>Paste your tone prompt in the instructions field</li>
+                  <li>Click "Save" to apply to all conversations in the project</li>
                 </ol>
                 <div className="bg-gray-50 p-6 rounded-xl">
-                  <p className="text-sm text-gray-600 font-medium mb-2">Example Template:</p>
-                  <p className="text-gray-700 font-mono text-sm">
-                    Project: [Project Name]<br />
-                    Context: [Brief description]<br />
-                    Communication Style: [Your tone prompt]<br />
-                    Requirements: [Specific needs]<br />
-                    Deliverable: [What you need]
+                  <p className="text-sm text-gray-600 font-medium mb-2">Alternative Method:</p>
+                  <p className="text-gray-700">
+                    You can also create a text file named <code>tone.txt</code> with your tone prompt and add it to your project files. This keeps your tone settings with your project and makes them easy to reference.
                   </p>
                 </div>
               </div>
