@@ -92,7 +92,7 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
           disabled={!hasChanges || isLoading || isRegenerating}
           className="w-full"
         >
-          {hasChanges ? 'Apply Changes & Regenerate' : 'No Changes to Apply'}
+          {hasChanges ? 'Regenerate Content' : 'No Changes to Regenerate'}
         </Button>
       </div>
     </motion.div>

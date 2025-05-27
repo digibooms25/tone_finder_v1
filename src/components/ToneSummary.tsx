@@ -11,6 +11,7 @@ interface ToneSummaryProps {
   showSave?: boolean;
   defaultName?: string;
   isEditing?: boolean;
+  hasChanges?: boolean;
 }
 
 const ToneSummary: React.FC<ToneSummaryProps> = ({ 
@@ -21,6 +22,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
   showSave = false,
   defaultName,
   isEditing = false,
+  hasChanges = false,
 }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [toneName, setToneName] = useState(defaultName || title);
@@ -80,9 +82,10 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
             <Button
               onClick={handleSubmit}
               isLoading={isLoading}
+              disabled={!hasChanges}
               className="w-full mt-6"
             >
-              Save Tone
+              {hasChanges ? 'Save Changes' : 'No Changes to Save'}
             </Button>
           )}
         </div>
