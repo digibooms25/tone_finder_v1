@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Slider from './Slider';
 import Button from './Button';
+import { RefreshCw } from 'lucide-react';
 
 interface ToneAdjusterProps {
   traits: {
@@ -65,7 +66,19 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
     >
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">Adjust Your Tone</h3>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-800">Adjust Your Tone</h3>
+        <Button
+          onClick={handleRegenerate}
+          isLoading={isLoading || isRegenerating}
+          variant="text"
+          size="sm"
+          icon={<RefreshCw size={16} />}
+        >
+          Regenerate
+        </Button>
+      </div>
+      
       <p className="text-gray-600 mb-6">Fine-tune your writing style by adjusting these sliders.</p>
       
       <div className="space-y-4">
@@ -78,16 +91,6 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
             displayLabels={displayLabels}
           />
         ))}
-      </div>
-      
-      <div className="mt-6">
-        <Button
-          onClick={handleRegenerate}
-          isLoading={isLoading || isRegenerating}
-          className="w-full"
-        >
-          Regenerate Tone
-        </Button>
       </div>
     </motion.div>
   );
