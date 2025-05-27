@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Button from './Button';
-import { Edit2 } from 'lucide-react';
+import { Edit2, Check, X } from 'lucide-react';
 
 interface ToneSummaryProps {
   title: string;
@@ -25,11 +25,19 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
   const [isRenaming, setIsRenaming] = useState(false);
   const [toneName, setToneName] = useState(defaultName || title);
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     if (onSave && toneName.trim()) {
       await onSave(toneName);
+      setIsRenaming(false);
     }
+  };
+
+  const handleCancel = () => {
+    setToneName(defaultName || title);
+    setIsRenaming(false);
   };
   
   return (
@@ -40,16 +48,30 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
       transition={{ duration: 0.4 }}
     >
       {isRenaming ? (
-        <form onSubmit={handleSubmit} className="mb-6">
+        <div className="flex items-center gap-2 mb-6">
           <input
             type="text"
             value={toneName}
             onChange={(e) => setToneName(e.target.value)}
-            className="w-full px-4 py-2 text-2xl font-bold text-gray-900 border-b-2 border-blue-500 focus:outline-none bg-transparent"
+            className="flex-1 px-4 py-2 text-2xl font-bold text-gray-900 border-b-2 border-blue-500 focus:outline-none bg-transparent"
             autoFocus
             required
           />
-        </form>
+          <button
+            onClick={() => handleSubmit()}
+            className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors"
+            title="Save"
+          >
+            <Check size={20} />
+          </button>
+          <button
+            onClick={handleCancel}
+            className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+            title="Cancel"
+          >
+            <X size={20} />
+          </button>
+        </div>
       ) : (
         <div className="flex items-start justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
@@ -76,7 +98,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
         <div className="space-y-4">
           <p className="text-gray-700 leading-relaxed">{summary}</p>
           
-          {showSave && (
+          {showSave && !isRenaming && (
             <Button
               onClick={handleSubmit}
               isLoading={isLoading}
