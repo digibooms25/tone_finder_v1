@@ -14,8 +14,13 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({ title, summary }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
-      <p className="text-gray-600 text-sm mb-4">A detailed breakdown of your unique tone and communication patterns.</p>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        {title || 'The Balanced Communicator'}
+      </h2>
+      
+      <p className="text-gray-600 text-sm mb-4">
+        A detailed breakdown of your unique tone and communication patterns.
+      </p>
       
       {summary ? (
         <p className="text-gray-700 leading-relaxed">{summary}</p>
