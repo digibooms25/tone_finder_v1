@@ -93,11 +93,14 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex justify-between items-start mb-12">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {user ? 'Your Saved Tones' : 'Writing Tone Dashboard'}
             </h1>
+            <p className="text-gray-600 max-w-2xl">
+              Here you can manage your writing tones, create new ones, or edit existing ones. Each tone comes with a custom prompt that helps AI assistants match your style perfectly. Copy prompts directly to use with any AI writing tool, or duplicate and modify tones to create variations of your voice.
+            </p>
           </div>
           
           <Button
