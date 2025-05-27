@@ -23,13 +23,15 @@ const Quiz: React.FC = () => {
     goToQuestion,
     setAnswer,
     calculateTraits,
+    setCurrentQuestionIndex,
   } = useQuizStore();
   const { resetCurrentTone } = useToneStore();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
-  // Reset current tone when starting a new quiz
+  // Reset current tone and set question index to 0 when starting a new quiz
   useEffect(() => {
     resetCurrentTone();
+    setCurrentQuestionIndex(0);
   }, []);
   
   useEffect(() => {

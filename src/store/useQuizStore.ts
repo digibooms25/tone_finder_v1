@@ -22,6 +22,7 @@ type QuizState = {
   nextQuestion: () => void;
   previousQuestion: () => void;
   goToQuestion: (index: number) => void;
+  setCurrentQuestionIndex: (index: number) => void;
   
   // Answer management
   setAnswer: (questionId: string, answer: string | string[]) => void;
@@ -71,6 +72,10 @@ export const useQuizStore = create<QuizState>()(
         if (index >= 0 && index < questions.length) {
           set({ currentQuestionIndex: index });
         }
+      },
+
+      setCurrentQuestionIndex: (index: number) => {
+        set({ currentQuestionIndex: index });
       },
       
       setAnswer: (questionId: string, answer: string | string[]) => {
@@ -174,9 +179,8 @@ export const useQuizStore = create<QuizState>()(
       resetQuiz: () => {
         set({
           currentQuestionIndex: 0,
-          answers: {},
-          traits: { ...initialTraits },
           isComplete: false,
+          traits: { ...initialTraits },
         });
       },
     }),
