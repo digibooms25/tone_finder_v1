@@ -37,13 +37,6 @@ const Slider: React.FC<SliderProps> = ({
     return ((localValue - min) / (max - min)) * 100;
   };
 
-  const getTrackColor = () => {
-    const percentage = getPercentage();
-    if (percentage < 33) return 'from-blue-400 to-blue-600';
-    if (percentage > 66) return 'from-purple-400 to-purple-600';
-    return 'from-indigo-400 to-indigo-600';
-  };
-
   const getFormattedValue = () => {
     return localValue.toFixed(2);
   };
@@ -60,19 +53,8 @@ const Slider: React.FC<SliderProps> = ({
     }
   };
 
-  const getBadgeColor = () => {
-    const percentage = getPercentage();
-    if (percentage < 33) return 'bg-blue-100 text-blue-800';
-    if (percentage > 66) return 'bg-purple-100 text-purple-800';
-    return 'bg-indigo-100 text-indigo-800';
-  };
-
   return (
-    <motion.div 
-      className="mb-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
-      whileHover={{ scale: 1.01 }}
-      transition={{ duration: 0.2 }}
-    >
+    <div className="mb-6">
       <div className="flex justify-between items-center mb-2">
         <label className="text-sm font-medium text-gray-700">{label}</label>
         <div className="flex items-center gap-2">
@@ -82,22 +64,19 @@ const Slider: React.FC<SliderProps> = ({
           >
             {getFormattedValue()}
           </motion.span>
-          <motion.span
-            className={`text-xs px-3 py-1 rounded-full font-medium ${getBadgeColor()}`}
-            animate={{ scale: isHovered ? 1.05 : 1 }}
-          >
+          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-medium">
             {getLabelByValue()}
-          </motion.span>
+          </span>
         </div>
       </div>
       
-      <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full" />
+      <div className="relative h-[15px] flex items-center">
+        <div className="absolute w-full h-[2px] bg-gray-200 rounded-full" />
         <div 
-          className={`absolute h-full bg-gradient-to-r ${getTrackColor()} rounded-full`}
+          className="absolute h-[2px] bg-blue-600 rounded-full"
           style={{ width: `${getPercentage()}%` }}
         />
-        <motion.input
+        <input
           type="range"
           min={min}
           max={max}
@@ -106,54 +85,22 @@ const Slider: React.FC<SliderProps> = ({
           onChange={handleChange}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="relative w-full h-2 bg-transparent appearance-none cursor-pointer z-10"
-          style={{
-            WebkitAppearance: 'none',
-            background: 'transparent',
-          }}
-          css={{
-            '&::-webkit-slider-thumb': {
-              WebkitAppearance: 'none',
-              appearance: 'none',
-              width: '16px',
-              height: '16px',
-              background: 'white',
-              border: '2px solid rgb(99, 102, 241)',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            },
-            '&::-webkit-slider-thumb:hover': {
-              transform: 'scale(1.2)',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            },
-            '&::-moz-range-thumb': {
-              width: '16px',
-              height: '16px',
-              background: 'white',
-              border: '2px solid rgb(99, 102, 241)',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-            },
-            '&::-moz-range-thumb:hover': {
-              transform: 'scale(1.2)',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            },
-          }}
+          className="absolute w-full h-full opacity-0 cursor-pointer"
         />
-        
-        {displayLabels && (
-          <div className="flex justify-between mt-2 text-xs text-gray-500">
-            <span>{displayLabels[0]}</span>
-            <span>Balanced</span>
-            <span>{displayLabels[1]}</span>
-          </div>
-        )}
+        <div 
+          className="absolute w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-sm"
+          style={{ left: `${getPercentage()}%`, transform: 'translateX(-50%)' }}
+        />
       </div>
-    </motion.div>
+      
+      {displayLabels && (
+        <div className="flex justify-between mt-1 text-xs text-gray-500">
+          <span>{displayLabels[0]}</span>
+          <span>Balanced</span>
+          <span>{displayLabels[1]}</span>
+        </div>
+      )}
+    </div>
   );
 };
 
