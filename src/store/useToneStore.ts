@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase, ToneProfile } from '../lib/supabase';
-import { generateToneSummary, generateToneExamples } from '../lib/openai';
+import { generateToneSummary, generateToneExamples, OpenAIQuotaError } from '../lib/openai';
 
 type ToneState = {
   currentTone: {
@@ -20,6 +20,7 @@ type ToneState = {
   savedTones: ToneProfile[];
   loading: boolean;
   error: string | null;
+  isQuotaExceeded: boolean;
   
   generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
@@ -30,6 +31,7 @@ type ToneState = {
   setCurrentToneFromProfile: (tone: ToneProfile) => void;
   updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
   resetCurrentTone: () => void;
+  clearError: () => void;
 };
 
 const initialTraits = {
@@ -56,10 +58,11 @@ export const useToneStore = create<ToneState>()(
       savedTones: [],
       loading: false,
       error: null,
+      isQuotaExceeded: false,
       
       generateContent: async () => {
         try {
-          set({ loading: true, error: null });
+          set({ loading: true, error: null, isQuotaExceeded: false });
           const { currentTone } = get();
           const traits = {
             formality: currentTone.formality,
@@ -75,6 +78,10 @@ export const useToneStore = create<ToneState>()(
             generateToneSummary(traits),
             generateToneExamples(traits),
           ]);
+          
+          if (!summaryResult || !examplesResult) {
+            throw new Error('Failed to generate content. Please try again.');
+          }
           
           set((state) => ({
             currentTone: {
@@ -96,11 +103,22 @@ export const useToneStore = create<ToneState>()(
             });
           }
         } catch (error) {
-          set({ error: (error as Error).message });
+          if (error instanceof OpenAIQuotaError) {
+            set({ 
+              error: 'OpenAI API quota exceeded. Please try again in a few minutes.',
+              isQuotaExceeded: true 
+            });
+          } else {
+            set({ error: (error as Error).message });
+          }
           throw error;
         } finally {
           set({ loading: false });
         }
+      },
+      
+      clearError: () => {
+        set({ error: null, isQuotaExceeded: false });
       },
       
       saveTone: async (name: string, userId: string) => {
@@ -279,6 +297,8 @@ export const useToneStore = create<ToneState>()(
       resetCurrentTone: () => {
         set({
           currentTone: { ...initialToneState },
+          error: null,
+          isQuotaExceeded: false,
         });
       },
     }),

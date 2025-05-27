@@ -20,9 +20,12 @@ const Results: React.FC = () => {
   const { 
     currentTone,
     loading,
+    error,
+    isQuotaExceeded,
     generateContent,
     saveTone,
     setCurrentToneTraits,
+    clearError,
   } = useToneStore();
   const { user } = useAuthStore();
   
@@ -48,6 +51,8 @@ const Results: React.FC = () => {
       if (!toneId && !currentTone.summary && location.state?.fromQuiz) {
         try {
           await generateContent();
+        } catch (error) {
+          // Error is handled by the store
         } finally {
           setIsGenerating(false);
         }
@@ -82,6 +87,7 @@ const Results: React.FC = () => {
   };
   
   const handleRegenerate = async () => {
+    clearError();
     setIsGenerating(true);
     try {
       await generateContent();
@@ -134,6 +140,17 @@ const Results: React.FC = () => {
             }
           </motion.p>
         </header>
+        
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">{error}</p>
+            {isQuotaExceeded && (
+              <p className="mt-2 text-red-600">
+                The AI service is currently unavailable due to high demand. Please try again in a few minutes.
+              </p>
+            )}
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-8">

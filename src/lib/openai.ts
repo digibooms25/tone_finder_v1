@@ -66,11 +66,22 @@ Respond with ONLY a JSON object containing numeric scores between -1 and 1 for e
   }
 };
 
+export class OpenAIQuotaError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'OpenAIQuotaError';
+  }
+}
+
+const isQuotaError = (error: any) => {
+  return error?.status === 429 || (error?.message && error.message.includes('quota'));
+};
+
 export const generateToneSummary = async (traits: typeof defaultScores): Promise<{
   title: string;
   summary: string;
   prompt: string;
-}> => {
+} | null> => {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -91,22 +102,25 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
 
     const content = response.choices[0]?.message.content;
     if (!content) {
-      throw new Error('No response from OpenAI');
+      return null;
     }
 
     const result = JSON.parse(content);
     if (!result.title || !result.summary || !result.prompt) {
-      throw new Error('Invalid response format from OpenAI');
+      return null;
     }
 
     return result;
   } catch (error) {
     console.error('Error generating tone summary:', error);
+    if (isQuotaError(error)) {
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again later.');
+    }
     throw error;
   }
 };
 
-export const generateToneExamples = async (traits: typeof defaultScores): Promise<string[]> => {
+export const generateToneExamples = async (traits: typeof defaultScores): Promise<string[] | null> => {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -127,17 +141,20 @@ Respond with a JSON object containing an "examples" array with three strings.`
 
     const content = response.choices[0]?.message.content;
     if (!content) {
-      throw new Error('No response from OpenAI');
+      return null;
     }
 
     const result = JSON.parse(content);
     if (!Array.isArray(result.examples) || result.examples.length !== 3) {
-      throw new Error('Invalid examples format from OpenAI');
+      return null;
     }
 
     return result.examples;
   } catch (error) {
     console.error('Error generating tone examples:', error);
+    if (isQuotaError(error)) {
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again later.');
+    }
     throw error;
   }
 };
