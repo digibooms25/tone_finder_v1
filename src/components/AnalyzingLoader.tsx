@@ -2,77 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AnalyzingLoader: React.FC = () => {
-  const [progress, setProgress] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(0);
   
   const phases = [
     {
       title: "Analyzing Responses",
-      description: "Processing your communication patterns and preferences...",
-      duration: 2000,
-      target: 25
+      description: "Processing your communication patterns..."
     },
     {
       title: "Detecting Style",
-      description: "Identifying your unique writing characteristics...",
-      duration: 2000,
-      target: 50
+      description: "Identifying your unique characteristics..."
     },
     {
-      title: "Mapping Traits",
-      description: "Building your personalized tone profile...",
-      duration: 2000,
-      target: 75
+      title: "Building Profile",
+      description: "Creating your personalized tone map..."
     },
     {
       title: "Generating Results",
-      description: "Creating tailored writing examples and recommendations...",
-      duration: 2000,
-      target: 98
+      description: "Crafting your custom recommendations..."
     }
   ];
 
   useEffect(() => {
-    let timeoutIds: NodeJS.Timeout[] = [];
-    let intervalId: NodeJS.Timeout;
+    const interval = setInterval(() => {
+      setCurrentPhase(current => (current + 1) % phases.length);
+    }, 2000);
 
-    // Start with a delay to show initial state
-    timeoutIds.push(setTimeout(() => {
-      // Progress animation for each phase
-      phases.forEach((phase, index) => {
-        const startTime = phases.slice(0, index).reduce((acc, p) => acc + p.duration, 0);
-        const previousTarget = index > 0 ? phases[index - 1].target : 0;
-        
-        timeoutIds.push(setTimeout(() => {
-          setCurrentPhase(index);
-          
-          // Smooth progress animation within each phase
-          const startProgress = previousTarget;
-          const endProgress = phase.target;
-          const duration = phase.duration;
-          const steps = duration / 50; // Update every 50ms
-          const increment = (endProgress - startProgress) / steps;
-          
-          intervalId = setInterval(() => {
-            setProgress(prev => {
-              const next = prev + increment;
-              return next > endProgress ? endProgress : next;
-            });
-          }, 50);
-          
-          // Clear interval at the end of this phase
-          timeoutIds.push(setTimeout(() => {
-            clearInterval(intervalId);
-          }, duration));
-          
-        }, startTime));
-      });
-    }, 500));
-
-    return () => {
-      timeoutIds.forEach(id => clearTimeout(id));
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -81,16 +37,42 @@ const AnalyzingLoader: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 rounded-2xl shadow-lg"
+          className="bg-white p-8 rounded-2xl shadow-lg relative"
         >
-          {/* Progress Bar */}
-          <div className="relative h-3 bg-gray-100 rounded-full mb-8 overflow-hidden">
-            <motion.div
-              className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
-              initial={{ width: "0%" }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.5 }}
-            />
+          {/* Circular Loader */}
+          <div className="flex justify-center mb-8">
+            <div className="relative w-24 h-24">
+              <motion.div
+                className="absolute inset-0 border-4 border-blue-500 rounded-full"
+                style={{ borderTopColor: 'transparent' }}
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+              <motion.div
+                className="absolute inset-2 border-4 border-blue-300 rounded-full"
+                style={{ borderTopColor: 'transparent', borderLeftColor: 'transparent' }}
+                animate={{ rotate: -360 }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+              <motion.div
+                className="absolute inset-4 border-4 border-blue-200 rounded-full"
+                style={{ borderTopColor: 'transparent', borderRightColor: 'transparent' }}
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              />
+            </div>
           </div>
 
           {/* Phase Title */}
@@ -113,29 +95,22 @@ const AnalyzingLoader: React.FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-gray-600 text-center mb-6"
+              className="text-gray-600 text-center"
             >
               {phases[currentPhase].description}
             </motion.p>
           </AnimatePresence>
 
-          {/* Progress Percentage */}
-          <div className="text-center text-sm font-medium text-gray-500">
-            {Math.round(progress)}% Complete
-          </div>
-
-          {/* Visual Progress Indicators */}
-          <div className="flex justify-center gap-3 mt-6">
+          {/* Phase Indicators */}
+          <div className="flex justify-center gap-2 mt-6">
             {phases.map((_, index) => (
               <motion.div
                 key={index}
-                className={`w-2.5 h-2.5 rounded-full ${
-                  index === currentPhase ? 'bg-blue-600' :
-                  index < currentPhase ? 'bg-blue-400' : 'bg-gray-200'
+                className={`w-2 h-2 rounded-full ${
+                  index === currentPhase ? 'bg-blue-600' : 'bg-gray-200'
                 }`}
                 animate={{
-                  scale: index === currentPhase ? [1, 1.2, 1] : 1,
-                  opacity: index === currentPhase ? 1 : 0.7
+                  scale: index === currentPhase ? [1, 1.2, 1] : 1
                 }}
                 transition={{
                   duration: 1,
