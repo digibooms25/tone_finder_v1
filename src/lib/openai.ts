@@ -20,18 +20,50 @@ const defaultScores = {
   expressiveness: 0,
 };
 
+// Retry configuration
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const retryWithExponentialBackoff = async <T>(
+  operation: () => Promise<T>,
+  retries = MAX_RETRIES,
+  delay = INITIAL_RETRY_DELAY
+): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error: any) {
+    if (retries === 0 || !isRetryableError(error)) {
+      throw error;
+    }
+    
+    await sleep(delay);
+    return retryWithExponentialBackoff(operation, retries - 1, delay * 2);
+  }
+};
+
+const isRetryableError = (error: any) => {
+  return error?.status === 429 || 
+    error?.status === 500 || 
+    error?.status === 502 || 
+    error?.status === 503 || 
+    error?.status === 504;
+};
+
 export const scoreFreeTextResponse = async (text: string): Promise<typeof defaultScores> => {
   if (!text.trim()) {
     throw new Error('Text is required for scoring');
   }
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert at analyzing writing style and tone. Score the following text on these traits:
+    const response = await retryWithExponentialBackoff(async () => {
+      return await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert at analyzing writing style and tone. Score the following text on these traits:
 - Formality (-1 very casual to +1 very formal)
 - Brevity (-1 verbose to +1 concise)
 - Humor (-1 serious to +1 playful)
@@ -40,9 +72,10 @@ export const scoreFreeTextResponse = async (text: string): Promise<typeof defaul
 - Expressiveness (-1 reserved to +1 expressive)
 
 Respond with ONLY a JSON object containing numeric scores between -1 and 1 for each trait.`
-        },
-        { role: 'user', content: text }
-      ]
+          },
+          { role: 'user', content: text }
+        ]
+      });
     });
 
     const content = response.choices[0]?.message.content;
@@ -62,6 +95,9 @@ Respond with ONLY a JSON object containing numeric scores between -1 and 1 for e
     return normalizedScores;
   } catch (error) {
     console.error('Error scoring free text:', error);
+    if (isQuotaError(error)) {
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again later.');
+    }
     return defaultScores;
   }
 };
@@ -83,21 +119,23 @@ export const generateToneSummary = async (traits: typeof defaultScores): Promise
   prompt: string;
 } | null> => {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: `Create a writing style analysis with:
+    const response = await retryWithExponentialBackoff(async () => {
+      return await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: `Create a writing style analysis with:
 1. A unique title ("The [Adjective] [Noun]")
 2. A friendly summary explaining trait combinations
 3. A clear prompt starting with "Write in a tone that is..."
 
 Respond with a JSON object containing "title", "summary", and "prompt" keys.`
-        },
-        { role: 'user', content: JSON.stringify(traits) }
-      ],
-      temperature: 0.8
+          },
+          { role: 'user', content: JSON.stringify(traits) }
+        ],
+        temperature: 0.8
+      });
     });
 
     const content = response.choices[0]?.message.content;
@@ -114,7 +152,7 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
   } catch (error) {
     console.error('Error generating tone summary:', error);
     if (isQuotaError(error)) {
-      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again later.');
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
     }
     throw error;
   }
@@ -122,21 +160,23 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
 
 export const generateToneExamples = async (traits: typeof defaultScores): Promise<string[] | null> => {
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: `Create three examples (3-5 sentences each) demonstrating the given tone:
+    const response = await retryWithExponentialBackoff(async () => {
+      return await openai.chat.completions.create({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'system',
+            content: `Create three examples (3-5 sentences each) demonstrating the given tone:
 1. A professional email
 2. A social media post
 3. A customer service response
 
 Respond with a JSON object containing an "examples" array with three strings.`
-        },
-        { role: 'user', content: JSON.stringify(traits) }
-      ],
-      temperature: 0.7
+          },
+          { role: 'user', content: JSON.stringify(traits) }
+        ],
+        temperature: 0.7
+      });
     });
 
     const content = response.choices[0]?.message.content;
@@ -153,7 +193,7 @@ Respond with a JSON object containing an "examples" array with three strings.`
   } catch (error) {
     console.error('Error generating tone examples:', error);
     if (isQuotaError(error)) {
-      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again later.');
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
     }
     throw error;
   }
