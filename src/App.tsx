@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
+import Header from './components/Header';
 import Landing from './pages/Landing';
 import Quiz from './pages/Quiz';
 import Results from './pages/Results';
@@ -23,15 +24,20 @@ function App() {
   
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/results" element={<Results />} />
-        <Route 
-          path="/dashboard" 
-          element={user ? <Dashboard /> : <Navigate to="/" />} 
-        />
-      </Routes>
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/results" element={<Results />} />
+            <Route 
+              path="/dashboard" 
+              element={user ? <Dashboard /> : <Navigate to="/" />} 
+            />
+          </Routes>
+        </main>
+      </div>
     </Router>
   );
 }
