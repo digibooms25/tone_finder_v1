@@ -31,11 +31,12 @@ export const useAuthStore = create<AuthState>((set) => ({
           user: { 
             id: data.user.id, 
             email: data.user.email || '',
-          } 
+          },
+          error: null 
         });
       }
     } catch (error) {
-      set({ error: (error as Error).message });
+      set({ error: (error as Error).message, user: null });
     } finally {
       set({ loading: false });
     }
@@ -56,11 +57,12 @@ export const useAuthStore = create<AuthState>((set) => ({
           user: { 
             id: data.user.id, 
             email: data.user.email || '',
-          } 
+          },
+          error: null
         });
       }
     } catch (error) {
-      set({ error: (error as Error).message });
+      set({ error: (error as Error).message, user: null });
     } finally {
       set({ loading: false });
     }
@@ -71,7 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: true, error: null });
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      set({ user: null });
+      set({ user: null, error: null });
     } catch (error) {
       set({ error: (error as Error).message });
     } finally {
@@ -82,20 +84,38 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkSession: async () => {
     try {
       set({ loading: true, error: null });
-      const { data } = await supabase.auth.getSession();
       
-      if (data.session?.user) {
-        set({ 
-          user: { 
-            id: data.session.user.id, 
-            email: data.session.user.email || '',
-          } 
-        });
-      } else {
-        set({ user: null });
+      // First try to get the current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        // If there's an error getting the session, clear the state
+        set({ user: null, error: null });
+        return;
       }
+
+      if (!session) {
+        // No session found, clear the state
+        set({ user: null, error: null });
+        return;
+      }
+
+      // Valid session exists
+      set({ 
+        user: { 
+          id: session.user.id, 
+          email: session.user.email || '',
+        },
+        error: null
+      });
+      
     } catch (error) {
-      set({ error: (error as Error).message, user: null });
+      // Handle any unexpected errors by clearing the state
+      console.error('Session check error:', error);
+      set({ 
+        user: null, 
+        error: 'Session verification failed. Please sign in again.'
+      });
     } finally {
       set({ loading: false });
     }
