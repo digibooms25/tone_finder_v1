@@ -111,26 +111,25 @@ export const generateToneSummary = async (
       messages: [
         {
           role: 'system',
-          content: `You are an expert at creating tone and style instructions. Based on the user's trait scores, generate:
+          content: `You are an expert at analyzing writing styles and creating personalized tone descriptions. Based on the provided trait scores, generate three components:
 
-1. A unique, personalized title that captures their writing style essence
-   - Should be creative and specific to their traits
-   - Format: "The [Adjective] [Communicator/Writer/Voice]" or similar pattern
-   - Examples: 
-     - "The Empathetic Storyteller"
-     - "The Direct Problem-Solver"
-     - "The Engaging Conversationalist"
+1. A unique, creative title that captures the essence of this writing style
+   - Should be descriptive and memorable
+   - Format: "The [Adjective] [Noun]" where noun could be Communicator/Voice/Writer/etc.
+   - Examples: "The Empathetic Storyteller", "The Strategic Diplomat", "The Dynamic Innovator"
+   - NEVER use generic titles like "Your Writing Style Analysis"
 
-2. A clear, specific prompt that will help AI writing assistants match their voice
-   - Start with: "Write in a tone that is..."
-   - Describe key characteristics
-   - Provide specific examples or comparisons
-   - Keep it detailed but concise (100-150 words)
+2. A friendly, conversational summary that:
+   - Explains how their traits work together
+   - Highlights unique combinations
+   - Suggests where this style works best
+   - Uses natural, engaging language
 
-3. A friendly, conversational summary that:
-   - Highlights unique aspects of their tone
-   - Explains how traits work together
-   - Suggests where this tone would be effective
+3. A clear, specific prompt for AI writing assistants that:
+   - Starts with "Write in a tone that is..."
+   - Describes key characteristics
+   - Provides specific examples or comparisons
+   - Keeps it detailed but concise
 
 Respond with a JSON object containing "title", "summary", and "prompt" keys.`
         },
@@ -138,7 +137,8 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
           role: 'user',
           content: JSON.stringify(traits)
         }
-      ]
+      ],
+      temperature: 0.8
     });
 
     const content = response.choices[0]?.message.content;
@@ -146,11 +146,18 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(content);
+    const result = JSON.parse(content);
+    
+    // Ensure we never return a generic title
+    if (result.title === 'Your Writing Style Analysis') {
+      result.title = 'The Balanced Communicator';
+    }
+
+    return result;
   } catch (error) {
     console.error('Error generating tone summary:', error);
     return {
-      title: 'Your Writing Style Analysis',
+      title: 'The Balanced Communicator',
       summary: 'We could not generate a summary of your tone at this time.',
       prompt: 'Write in a balanced, neutral tone.'
     };
