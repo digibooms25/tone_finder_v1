@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
-import { Brain, Sliders, Wand2, ArrowRight, Sparkles, MessageSquare } from 'lucide-react';
+import { Brain, Sliders, Wand2, ArrowRight, Sparkles, MessageSquare, Bot, Cpu, MessageCircle } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
               size="lg"
               onClick={handleStartTest}
               className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
+              icon={<ArrowRight className="ml-2" size={24} />}
               iconPosition="right"
             >
               Start Your Journey
@@ -166,6 +166,70 @@ const Landing: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">{step.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Integration Guides Section */}
+      <section className="py-24 px-4 relative">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Use Your Tone Everywhere</h2>
+            <p className="text-xl text-gray-600">Step-by-step guides for your favorite AI assistants</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <MessageCircle size={28} />,
+                title: "ChatGPT Guide",
+                description: "Learn three ways to use your tone with ChatGPT: conversation prompts, system instructions, and project settings.",
+                link: "/guides/chatgpt"
+              },
+              {
+                icon: <Bot size={28} />,
+                title: "Claude Guide",
+                description: "Master Claude's unique features to maintain your writing style across conversations and documents.",
+                link: "/guides/claude"
+              },
+              {
+                icon: <Cpu size={28} />,
+                title: "Gemini Guide",
+                description: "Integrate your tone seamlessly with Google's Gemini for consistent communication.",
+                link: "/guides/gemini"
+              }
+            ].map((guide, index) => (
+              <motion.div
+                key={index}
+                className="relative group cursor-pointer"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                onClick={() => navigate(guide.link)}
+              >
+                <div className="h-full p-8 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300" />
+                  <div className="relative">
+                    <div className="bg-blue-100 text-blue-600 p-4 rounded-xl inline-block mb-6 group-hover:scale-110 transition-transform duration-300">
+                      {guide.icon}
+                    </div>
+                    <h3 className="text-xl font-bold mb-4 text-gray-900">{guide.title}</h3>
+                    <p className="text-gray-600 leading-relaxed mb-6">{guide.description}</p>
+                    <div className="flex items-center text-blue-600 font-medium">
+                      <span>View Guide</span>
+                      <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
