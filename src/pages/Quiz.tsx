@@ -10,6 +10,7 @@ import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
 import { useToneStore } from '../store/useToneStore';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import AnalyzingLoader from '../components/AnalyzingLoader';
 
 const Quiz: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Quiz: React.FC = () => {
     calculateTraits,
   } = useQuizStore();
   const { resetCurrentTone } = useToneStore();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   // Reset current tone when starting a new quiz
   useEffect(() => {
@@ -31,7 +33,7 @@ const Quiz: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    if (isComplete) {
+    if (isComplete && !isAnalyzing) {
       handleComplete();
     }
   }, [isComplete]);
@@ -57,13 +59,19 @@ const Quiz: React.FC = () => {
   };
   
   const handleComplete = async () => {
+    setIsAnalyzing(true);
     try {
       await calculateTraits();
       navigate('/results', { state: { fromQuiz: true } });
     } catch (error) {
       console.error('Error calculating traits:', error);
+      setIsAnalyzing(false);
     }
   };
+  
+  if (isAnalyzing) {
+    return <AnalyzingLoader />;
+  }
   
   const renderQuestion = () => {
     if (!currentQuestion) return null;
