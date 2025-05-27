@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
               size="lg"
               onClick={handleStartTest}
               className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
+              icon={<ArrowRight className="ml-2" size={24} />}
               iconPosition="right"
             >
               Start Your Journey
@@ -121,57 +121,6 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-24 px-4 bg-white/50 backdrop-blur-sm relative">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-            <p className="text-xl text-gray-600">Three simple steps to find your perfect tone</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-12">
-            {[
-              {
-                number: "01",
-                title: "Take the Quiz",
-                description: "Answer 20 engaging questions about your communication style."
-              },
-              {
-                number: "02",
-                title: "Get Your Analysis",
-                description: "Receive a detailed breakdown of your unique writing personality."
-              },
-              {
-                number: "03",
-                title: "Start Writing",
-                description: "Use your custom prompt with any AI tool for consistent results."
-              }
-            ].map((step, index) => (
-              <motion.div
-                key={index}
-                className="text-center relative"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-              >
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-bold mb-6 mx-auto transform -rotate-6 shadow-lg">
-                  {step.number}
-                </div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-900">{step.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* AI Integration Guides Section */}
       <section className="py-24 px-4 relative">
         <div className="max-w-6xl mx-auto">
@@ -189,7 +138,7 @@ const Landing: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: <MessageCircle size={28} />,
+                icon: "https://raw.githubusercontent.com/digibooms25/images/refs/heads/main/openai.png",
                 title: "ChatGPT Guide",
                 description: "Learn three ways to use your tone with ChatGPT: conversation prompts, system instructions, and project settings.",
                 link: "/guides/chatgpt",
@@ -197,7 +146,7 @@ const Landing: React.FC = () => {
                 hoverGradient: "from-emerald-500 to-teal-600"
               },
               {
-                icon: <Bot size={28} />,
+                icon: "https://raw.githubusercontent.com/digibooms25/images/refs/heads/main/claude.png",
                 title: "Claude Guide",
                 description: "Master Claude's unique features to maintain your writing style across conversations and documents.",
                 link: "/guides/claude",
@@ -205,7 +154,7 @@ const Landing: React.FC = () => {
                 hoverGradient: "from-purple-500 to-indigo-600"
               },
               {
-                icon: <Cpu size={28} />,
+                icon: "https://raw.githubusercontent.com/digibooms25/images/refs/heads/main/gemini.png",
                 title: "Gemini Guide",
                 description: "Integrate your tone seamlessly with Google's Gemini for consistent communication.",
                 link: "/guides/gemini",
@@ -225,7 +174,11 @@ const Landing: React.FC = () => {
                 <div className={`h-full p-8 rounded-2xl bg-gradient-to-br ${guide.gradient} group-hover:${guide.hoverGradient} transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-[1.02] shadow-xl`}>
                   <div className="relative text-white">
                     <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6 group-hover:scale-110 transition-transform duration-300">
-                      {guide.icon}
+                      <img 
+                        src={guide.icon} 
+                        alt={guide.title} 
+                        className="w-8 h-8"
+                      />
                     </div>
                     <h3 className="text-xl font-bold mb-4">{guide.title}</h3>
                     <p className="leading-relaxed mb-6 opacity-90">{guide.description}</p>
