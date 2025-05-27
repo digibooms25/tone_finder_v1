@@ -30,6 +30,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
   
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -46,6 +47,13 @@ const ToneCard: React.FC<ToneCardProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isRenaming]);
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -109,6 +117,14 @@ const ToneCard: React.FC<ToneCardProps> = ({
     setIsRenaming(false);
     setNewName(tone.name);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleRename();
+    } else if (e.key === 'Escape') {
+      cancelRename();
+    }
+  };
   
   // Create a visualization of the tone traits
   const traitBars = [
@@ -127,15 +143,12 @@ const ToneCard: React.FC<ToneCardProps> = ({
           {isRenaming ? (
             <div className="flex items-center gap-2">
               <input
+                ref={inputRef}
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="flex-1 px-2 py-1 text-lg font-semibold text-gray-800 border-b-2 border-blue-500 focus:outline-none bg-transparent"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleRename();
-                  if (e.key === 'Escape') cancelRename();
-                }}
               />
               <div className="flex items-center gap-1">
                 <button
