@@ -27,6 +27,15 @@ export const scoreFreeTextResponse = async (
     throw new Error('Text is required for scoring');
   }
 
+  const defaultScores = {
+    formality: 0,
+    brevity: 0,
+    humor: 0,
+    warmth: 0,
+    directness: 0,
+    expressiveness: 0,
+  };
+
   try {
     const systemPrompt = `You are an expert at analyzing writing style and tone. Analyze the following text for these traits:
 
@@ -65,7 +74,15 @@ Score each trait from -1 to +1, where:
 0 = neutral or balanced
 +1 = strongly exhibits the positive trait
 
-Respond with ONLY a JSON object containing the scores.`;
+You must respond with ONLY a JSON object containing numeric scores between -1 and 1 for each trait. Example:
+{
+  "formality": 0.5,
+  "brevity": -0.3,
+  "humor": 0.8,
+  "warmth": 0.2,
+  "directness": -0.4,
+  "expressiveness": 0.6
+}`;
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
@@ -83,24 +100,35 @@ Respond with ONLY a JSON object containing the scores.`;
 
     const content = response.choices[0]?.message.content;
     if (!content) {
-      throw new Error('No response from OpenAI');
+      console.error('Empty response from OpenAI');
+      return defaultScores;
     }
 
-    const scores = JSON.parse(content);
+    let scores;
+    try {
+      scores = JSON.parse(content);
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI response:', content);
+      return defaultScores;
+    }
     
     // Validate and normalize scores
     const traits = ['formality', 'brevity', 'humor', 'warmth', 'directness', 'expressiveness'];
-    traits.forEach(trait => {
-      if (typeof scores[trait] !== 'number') {
-        throw new Error(`Invalid score for ${trait}`);
-      }
-      scores[trait] = Math.max(-1, Math.min(1, scores[trait]));
-    });
+    const normalizedScores = { ...defaultScores };
 
-    return scores;
+    for (const trait of traits) {
+      const score = scores[trait];
+      if (typeof score === 'number' && !isNaN(score)) {
+        normalizedScores[trait as keyof typeof defaultScores] = Math.max(-1, Math.min(1, score));
+      } else {
+        console.error(`Invalid score for ${trait}:`, score);
+      }
+    }
+
+    return normalizedScores;
   } catch (error) {
     console.error('Error scoring free text:', error);
-    throw error;
+    return defaultScores;
   }
 };
 
