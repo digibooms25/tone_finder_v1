@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import Button from './Button';
-import { LogIn, LogOut, User, Menu, X, Home, PlusCircle } from 'lucide-react';
+import { LogIn, LogOut, User, Menu, X, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuthStore();
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
-    setShowMobileMenu(false);
+    setShowMenu(false);
   };
 
   const handleAuthSuccess = () => {
@@ -26,7 +26,7 @@ const Header: React.FC = () => {
 
   const handleNavigation = (path: string) => {
     navigate(path);
-    setShowMobileMenu(false);
+    setShowMenu(false);
   };
   
   return (
@@ -36,66 +36,23 @@ const Header: React.FC = () => {
           Find Your Tone
         </Link>
         
-        {/* Mobile Menu Button */}
+        {/* Menu Button */}
         <button
-          onClick={() => setShowMobileMenu(!showMobileMenu)}
-          className="lg:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors"
+          onClick={() => setShowMenu(!showMenu)}
+          className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
         >
-          {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+          {showMenu ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Desktop Menu */}
-        <div className="hidden lg:flex items-center gap-4">
-          {user ? (
-            <div className="flex items-center gap-4">
-              <Button
-                variant="text"
-                size="sm"
-                onClick={() => handleNavigation('/dashboard')}
-              >
-                Dashboard
-              </Button>
-              <Button
-                variant="text"
-                size="sm"
-                onClick={() => handleNavigation('/quiz')}
-              >
-                New Tone
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                icon={<User size={16} />}
-                onClick={handleSignOut}
-                className="flex items-center gap-2"
-              >
-                Sign Out
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              icon={<LogIn size={16} />}
-              onClick={() => {
-                setAuthMode('signin');
-                setShowAuthModal(true);
-              }}
-            >
-              Sign In
-            </Button>
-          )}
-        </div>
-
-        {/* Mobile Menu */}
+        {/* Menu Overlay */}
         <AnimatePresence>
-          {showMobileMenu && (
+          {showMenu && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 bg-white shadow-lg py-4 lg:hidden"
+              className="absolute top-full left-0 right-0 bg-white shadow-lg py-4"
             >
               <div className="container mx-auto px-4 flex flex-col gap-2">
                 {user ? (
@@ -130,7 +87,7 @@ const Header: React.FC = () => {
                     onClick={() => {
                       setAuthMode('signin');
                       setShowAuthModal(true);
-                      setShowMobileMenu(false);
+                      setShowMenu(false);
                     }}
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
