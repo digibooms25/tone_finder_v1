@@ -118,6 +118,24 @@ export const useToneStore = create<ToneState>()(
           set({ loading: true, error: null });
           const { currentTone } = get();
           
+          // If we have an ID, update the existing tone
+          if (currentTone.id) {
+            await get().updateTone(currentTone.id, {
+              name: name || currentTone.title,
+              formality: currentTone.formality,
+              brevity: currentTone.brevity,
+              humor: currentTone.humor,
+              warmth: currentTone.warmth,
+              directness: currentTone.directness,
+              expressiveness: currentTone.expressiveness,
+              summary: currentTone.summary,
+              prompt: currentTone.prompt,
+              examples: currentTone.examples,
+            });
+            return;
+          }
+          
+          // Otherwise create a new tone
           const { data, error } = await supabase
             .from('tone_profiles')
             .insert([
