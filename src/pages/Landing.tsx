@@ -192,13 +192,15 @@ const Landing: React.FC = () => {
             <p className="text-2xl font-bold text-blue-600 mb-12">
               Start sounding more like <em>you.</em>
             </p>
-            <Button
-              size="lg"
-              onClick={handleStartTest}
-              className="px-10 py-6 text-lg"
-            >
-              Get Started Now
-            </Button>
+            <div className="flex justify-center">
+              <Button
+                size="lg"
+                onClick={handleStartTest}
+                className="px-10 py-6 text-lg"
+              >
+                Get Started Now
+              </Button>
+            </div>
           </motion.div>
         </div>
       </section>
