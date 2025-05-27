@@ -25,6 +25,7 @@ type ToneState = {
   saveTone: (name: string, userId: string) => Promise<void>;
   loadSavedTones: (userId: string) => Promise<void>;
   deleteTone: (toneId: string) => Promise<void>;
+  duplicateTone: (toneId: string, userId: string) => Promise<void>;
   setCurrentToneTraits: (traits: Partial<typeof initialTraits>) => void;
   setCurrentToneFromProfile: (tone: ToneProfile) => void;
   updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
@@ -122,6 +123,47 @@ export const useToneStore = create<ToneState>()(
                 summary: currentTone.summary,
                 prompt: currentTone.prompt,
                 examples: currentTone.examples,
+              },
+            ])
+            .select();
+          
+          if (error) throw error;
+          
+          if (data) {
+            set((state) => ({
+              savedTones: [...state.savedTones, data[0] as ToneProfile],
+            }));
+          }
+        } catch (error) {
+          set({ error: (error as Error).message });
+          throw error;
+        } finally {
+          set({ loading: false });
+        }
+      },
+      
+      duplicateTone: async (toneId: string, userId: string) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const toneToDuplicate = get().savedTones.find(tone => tone.id === toneId);
+          if (!toneToDuplicate) throw new Error('Tone not found');
+          
+          const { data, error } = await supabase
+            .from('tone_profiles')
+            .insert([
+              {
+                user_id: userId,
+                name: `${toneToDuplicate.name} (Copy)`,
+                formality: toneToDuplicate.formality,
+                brevity: toneToDuplicate.brevity,
+                humor: toneToDuplicate.humor,
+                warmth: toneToDuplicate.warmth,
+                directness: toneToDuplicate.directness,
+                expressiveness: toneToDuplicate.expressiveness,
+                summary: toneToDuplicate.summary,
+                prompt: toneToDuplicate.prompt,
+                examples: toneToDuplicate.examples,
               },
             ])
             .select();

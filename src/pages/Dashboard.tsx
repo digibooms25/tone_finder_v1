@@ -9,7 +9,14 @@ import { PlusCircle, LogOut } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { savedTones, loadSavedTones, deleteTone, loading, setCurrentToneFromProfile } = useToneStore();
+  const { 
+    savedTones, 
+    loadSavedTones, 
+    deleteTone, 
+    duplicateTone,
+    loading, 
+    setCurrentToneFromProfile 
+  } = useToneStore();
   const { user, signOut } = useAuthStore();
   const [message, setMessage] = useState('');
   
@@ -26,15 +33,19 @@ const Dashboard: React.FC = () => {
     await deleteTone(id);
   };
   
+  const handleDuplicate = async (id: string) => {
+    if (!user) return;
+    await duplicateTone(id, user.id);
+    setMessage('Tone duplicated successfully!');
+    setTimeout(() => setMessage(''), 3000);
+  };
+  
   const handleCopyPrompt = (prompt: string) => {
     navigator.clipboard.writeText(prompt);
     setMessage('Prompt copied to clipboard!');
-    
-    setTimeout(() => {
-      setMessage('');
-    }, 3000);
+    setTimeout(() => setMessage(''), 3000);
   };
-
+  
   const handleEdit = (tone: ToneProfile) => {
     setCurrentToneFromProfile(tone);
     navigate(`/edit/${tone.id}`);
@@ -105,6 +116,7 @@ const Dashboard: React.FC = () => {
                 <ToneCard
                   tone={tone}
                   onDelete={handleDelete}
+                  onDuplicate={handleDuplicate}
                   onCopyPrompt={handleCopyPrompt}
                   onEdit={handleEdit}
                 />

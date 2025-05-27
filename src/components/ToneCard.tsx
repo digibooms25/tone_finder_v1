@@ -2,18 +2,26 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToneProfile } from '../lib/supabase';
 import Button from './Button';
-import { ChevronDown, ChevronUp, Edit2, Trash2, Copy } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit2, Trash2, Copy, Files } from 'lucide-react';
 
 interface ToneCardProps {
   tone: ToneProfile;
   onDelete: (id: string) => Promise<void>;
   onCopyPrompt: (prompt: string) => void;
+  onDuplicate: (id: string) => Promise<void>;
   onEdit?: (tone: ToneProfile) => void;
 }
 
-const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdit }) => {
+const ToneCard: React.FC<ToneCardProps> = ({ 
+  tone, 
+  onDelete, 
+  onCopyPrompt, 
+  onDuplicate,
+  onEdit 
+}) => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -28,6 +36,15 @@ const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdi
       } finally {
         setIsDeleting(false);
       }
+    }
+  };
+  
+  const handleDuplicate = async () => {
+    setIsDuplicating(true);
+    try {
+      await onDuplicate(tone.id);
+    } finally {
+      setIsDuplicating(false);
     }
   };
   
@@ -116,6 +133,17 @@ const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdi
           onClick={handleCopyPrompt}
         >
           Copy Prompt
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          icon={<Files size={16} />}
+          onClick={handleDuplicate}
+          isLoading={isDuplicating}
+        >
+          Duplicate
         </Button>
         
         <Button
