@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { useQuizStore } from '../store/useQuizStore';
 import Button from './Button';
 import { LogIn, LogOut, User, Menu, X, PlusCircle, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,6 +10,7 @@ import AuthForm from './AuthForm';
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuthStore();
+  const { resetQuiz } = useQuizStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -25,6 +27,9 @@ const Header: React.FC = () => {
   };
 
   const handleNavigation = (path: string) => {
+    if (path === '/quiz') {
+      resetQuiz();
+    }
     navigate(path);
     setShowMenu(false);
   };
