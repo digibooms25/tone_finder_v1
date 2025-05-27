@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { questions } from '../lib/questions';
-import { scoreFreeTextResponse } from '../lib/openai';
+import { scoreFreeTextResponse, OpenAIQuotaError } from '../lib/openai';
 
 type ToneTraits = {
   formality: number;
@@ -17,6 +17,7 @@ type QuizState = {
   answers: Record<string, string | string[]>;
   traits: ToneTraits;
   isComplete: boolean;
+  error: string | null;
   
   // Navigation
   nextQuestion: () => void;
@@ -31,6 +32,7 @@ type QuizState = {
   calculateTraits: () => Promise<ToneTraits>;
   updateTraits: (traits: Partial<ToneTraits>) => void;
   resetQuiz: () => void;
+  setError: (error: string | null) => void;
 };
 
 const initialTraits: ToneTraits = {
@@ -49,6 +51,7 @@ export const useQuizStore = create<QuizState>()(
       answers: {},
       traits: { ...initialTraits },
       isComplete: false,
+      error: null,
       
       nextQuestion: () => {
         const { currentQuestionIndex } = get();
@@ -86,9 +89,15 @@ export const useQuizStore = create<QuizState>()(
           },
         }));
       },
+
+      setError: (error: string | null) => {
+        set({ error });
+      },
       
       calculateTraits: async () => {
         const { answers } = get();
+        set({ error: null }); // Reset error state before calculation
+        
         const traitScores: Record<keyof ToneTraits, number[]> = {
           formality: [],
           brevity: [],
@@ -98,73 +107,89 @@ export const useQuizStore = create<QuizState>()(
           expressiveness: [],
         };
         
-        // Process choice and multi_select questions
-        for (const question of questions) {
-          const answer = answers[question.id];
-          
-          if (!answer) continue;
-          
-          if (question.type === 'choice') {
-            const selectedOption = question.options[answer as string];
-            if (selectedOption?.weights) {
-              Object.entries(selectedOption.weights).forEach(([trait, value]) => {
-                const traitKey = trait as keyof ToneTraits;
-                if (traitKey in traitScores) {
-                  traitScores[traitKey].push(value);
+        try {
+          // Process choice and multi_select questions
+          for (const question of questions) {
+            const answer = answers[question.id];
+            
+            if (!answer) continue;
+            
+            if (question.type === 'choice') {
+              const selectedOption = question.options[answer as string];
+              if (selectedOption?.weights) {
+                Object.entries(selectedOption.weights).forEach(([trait, value]) => {
+                  const traitKey = trait as keyof ToneTraits;
+                  if (traitKey in traitScores) {
+                    traitScores[traitKey].push(value);
+                  }
+                });
+              }
+            } 
+            else if (question.type === 'multi_select') {
+              const selectedOptions = answer as string[];
+              selectedOptions.forEach(option => {
+                const weights = question.options[option];
+                if (weights) {
+                  Object.entries(weights).forEach(([trait, value]) => {
+                    const traitKey = trait as keyof ToneTraits;
+                    if (traitKey in traitScores) {
+                      traitScores[traitKey].push(value);
+                    }
+                  });
                 }
               });
             }
-          } 
-          else if (question.type === 'multi_select') {
-            const selectedOptions = answer as string[];
-            selectedOptions.forEach(option => {
-              const weights = question.options[option];
-              if (weights) {
-                Object.entries(weights).forEach(([trait, value]) => {
-                  const traitKey = trait as keyof ToneTraits;
-                  if (traitKey in traitScores) {
-                    traitScores[traitKey].push(value);
-                  }
-                });
-              }
-            });
           }
-        }
-        
-        // Process free text questions
-        for (const question of questions) {
-          if (question.type === 'freeText') {
-            const text = answers[question.id] as string;
-            if (text) {
-              try {
-                const scores = await scoreFreeTextResponse(text);
-                Object.entries(scores).forEach(([trait, value]) => {
-                  const traitKey = trait as keyof ToneTraits;
-                  if (traitKey in traitScores) {
-                    traitScores[traitKey].push(value);
+          
+          // Process free text questions
+          for (const question of questions) {
+            if (question.type === 'freeText') {
+              const text = answers[question.id] as string;
+              if (text) {
+                try {
+                  const scores = await scoreFreeTextResponse(text);
+                  Object.entries(scores).forEach(([trait, value]) => {
+                    const traitKey = trait as keyof ToneTraits;
+                    if (traitKey in traitScores) {
+                      traitScores[traitKey].push(value);
+                    }
+                  });
+                } catch (error) {
+                  if (error instanceof OpenAIQuotaError) {
+                    set({ 
+                      error: 'OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.',
+                      isComplete: false 
+                    });
+                    throw error; // Re-throw to handle in the UI
                   }
-                });
-              } catch (error) {
-                console.error('Error scoring free text:', error);
+                  console.error('Error scoring free text:', error);
+                  // For other errors, continue with available scores
+                }
               }
             }
           }
-        }
-        
-        // Calculate final trait values (average and clamp between -1 and 1)
-        const calculatedTraits: ToneTraits = { ...initialTraits };
-        
-        Object.entries(traitScores).forEach(([trait, scores]) => {
-          const traitKey = trait as keyof ToneTraits;
-          if (scores.length > 0) {
-            const sum = scores.reduce((acc, val) => acc + val, 0);
-            const avg = sum / scores.length;
-            calculatedTraits[traitKey] = Math.max(-1, Math.min(1, avg));
+          
+          // Calculate final trait values (average and clamp between -1 and 1)
+          const calculatedTraits: ToneTraits = { ...initialTraits };
+          
+          Object.entries(traitScores).forEach(([trait, scores]) => {
+            const traitKey = trait as keyof ToneTraits;
+            if (scores.length > 0) {
+              const sum = scores.reduce((acc, val) => acc + val, 0);
+              const avg = sum / scores.length;
+              calculatedTraits[traitKey] = Math.max(-1, Math.min(1, avg));
+            }
+          });
+          
+          set({ traits: calculatedTraits });
+          return calculatedTraits;
+        } catch (error) {
+          if (error instanceof OpenAIQuotaError) {
+            throw error; // Re-throw quota errors to be handled by the UI
           }
-        });
-        
-        set({ traits: calculatedTraits });
-        return calculatedTraits;
+          console.error('Error calculating traits:', error);
+          return { ...initialTraits };
+        }
       },
       
       updateTraits: (partialTraits: Partial<ToneTraits>) => {
@@ -181,6 +206,7 @@ export const useQuizStore = create<QuizState>()(
           currentQuestionIndex: 0,
           isComplete: false,
           traits: { ...initialTraits },
+          error: null,
         });
       },
     }),

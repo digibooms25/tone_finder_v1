@@ -34,7 +34,7 @@ const retryWithExponentialBackoff = async <T>(
   try {
     return await operation();
   } catch (error: any) {
-    if (retries === 0 || !isRetryableError(error)) {
+    if (retries === 0 || !isRetryableError(error) || isQuotaError(error)) {
       throw error;
     }
     
@@ -44,8 +44,12 @@ const retryWithExponentialBackoff = async <T>(
 };
 
 const isRetryableError = (error: any) => {
-  return error?.status === 429 || 
-    error?.status === 500 || 
+  // Don't retry quota errors
+  if (isQuotaError(error)) {
+    return false;
+  }
+  
+  return error?.status === 500 || 
     error?.status === 502 || 
     error?.status === 503 || 
     error?.status === 504;
@@ -96,7 +100,7 @@ Respond with ONLY a JSON object containing numeric scores between -1 and 1 for e
   } catch (error) {
     console.error('Error scoring free text:', error);
     if (isQuotaError(error)) {
-      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again later.');
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
     }
     return defaultScores;
   }
@@ -110,7 +114,20 @@ export class OpenAIQuotaError extends Error {
 }
 
 const isQuotaError = (error: any) => {
-  return error?.status === 429 || (error?.message && error.message.includes('quota'));
+  // Check for both the status code and message content
+  return (
+    error?.status === 429 || 
+    (error?.message && (
+      error.message.toLowerCase().includes('quota') ||
+      error.message.toLowerCase().includes('rate limit') ||
+      error.message.toLowerCase().includes('capacity')
+    )) ||
+    (error?.error?.message && (
+      error.error.message.toLowerCase().includes('quota') ||
+      error.error.message.toLowerCase().includes('rate limit') ||
+      error.error.message.toLowerCase().includes('capacity')
+    ))
+  );
 };
 
 export const generateToneSummary = async (traits: typeof defaultScores): Promise<{
