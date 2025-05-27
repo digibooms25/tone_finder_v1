@@ -111,24 +111,24 @@ const ToneCard: React.FC<ToneCardProps> = ({
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                className="flex-1 px-2 py-1 text-lg font-semibold text-gray-800 border-b-2 border-blue-500 focus:outline-none"
+                className="flex-1 px-2 py-1 text-lg font-semibold text-gray-800 border-b-2 border-blue-500 focus:outline-none bg-transparent"
                 autoFocus
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleRename();
                   if (e.key === 'Escape') cancelRename();
                 }}
               />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 relative z-50">
                 <button
                   onClick={handleRename}
-                  className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors"
+                  className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors"
                   title="Save"
                 >
                   <Check size={16} />
                 </button>
                 <button
                   onClick={cancelRename}
-                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
                   title="Cancel"
                 >
                   <X size={16} />
@@ -154,13 +154,13 @@ const ToneCard: React.FC<ToneCardProps> = ({
           />
           
           <AnimatePresence>
-            {showMenu && (
+            {showMenu && !isRenaming && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.1 }}
-                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50"
+                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-40"
               >
                 <button
                   onClick={startRename}
