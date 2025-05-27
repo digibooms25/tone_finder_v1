@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToneProfile } from '../lib/supabase';
 import Button from './Button';
@@ -27,6 +27,26 @@ const ToneCard: React.FC<ToneCardProps> = ({
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(tone.name);
+  
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showMenu && 
+        menuRef.current && 
+        buttonRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -145,6 +165,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
         
         <div className="relative">
           <Button
+            ref={buttonRef}
             variant="text"
             size="sm"
             icon={<MoreVertical size={16} />}
@@ -156,6 +177,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
           <AnimatePresence>
             {showMenu && !isRenaming && (
               <motion.div
+                ref={menuRef}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
