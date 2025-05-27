@@ -81,14 +81,16 @@ const Dashboard: React.FC = () => {
         <p className="text-gray-600 mb-8">
           Take our quick tone test to understand your unique writing style. Get personalized insights and a custom prompt you can use with any AI writing assistant.
         </p>
-        <Button
-          onClick={handleNewTone}
-          size="lg"
-          className="w-full sm:w-auto"
-          icon={<PlusCircle size={20} />}
-        >
-          Start Tone Test
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            onClick={handleNewTone}
+            size="lg"
+            className="w-full sm:w-auto"
+            icon={<PlusCircle size={20} />}
+          >
+            Start Tone Test
+          </Button>
+        </div>
       </motion.div>
     </div>
   );
