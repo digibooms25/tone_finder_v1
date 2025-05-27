@@ -2,26 +2,31 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import Button from './Button';
-import { LogIn, LogOut, User, ChevronDown, Home, PlusCircle } from 'lucide-react';
+import { LogIn, LogOut, User, Menu, X, Home, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuthStore();
-  const [showMenu, setShowMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
-    setShowMenu(false);
+    setShowMobileMenu(false);
   };
 
   const handleAuthSuccess = () => {
     setShowAuthModal(false);
     navigate('/dashboard');
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setShowMobileMenu(false);
   };
   
   return (
@@ -31,75 +36,42 @@ const Header: React.FC = () => {
           Find Your Tone
         </Link>
         
-        <div className="relative">
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className="lg:hidden p-2 text-gray-600 hover:text-blue-600 transition-colors"
+        >
+          {showMobileMenu ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {/* Desktop Menu */}
+        <div className="hidden lg:flex items-center gap-4">
           {user ? (
-            <>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="text"
+                size="sm"
+                onClick={() => handleNavigation('/dashboard')}
+              >
+                Dashboard
+              </Button>
+              <Button
+                variant="text"
+                size="sm"
+                onClick={() => handleNavigation('/quiz')}
+              >
+                New Tone
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
                 icon={<User size={16} />}
-                onClick={() => setShowMenu(!showMenu)}
+                onClick={handleSignOut}
                 className="flex items-center gap-2"
               >
-                <span className="max-w-[150px] truncate">{user.email}</span>
-                <ChevronDown size={16} className={`transition-transform ${showMenu ? 'rotate-180' : ''}`} />
+                Sign Out
               </Button>
-              
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 border border-gray-100"
-                  >
-                    <button
-                      onClick={() => {
-                        navigate('/');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <Home size={16} />
-                      Home
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        navigate('/dashboard');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <User size={16} />
-                      Dashboard
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        navigate('/quiz');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                    >
-                      <PlusCircle size={16} />
-                      New Tone
-                    </button>
-                    
-                    <div className="h-px bg-gray-200 my-1" />
-                    
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <LogOut size={16} />
-                      Sign Out
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </>
+            </div>
           ) : (
             <Button
               variant="outline"
@@ -114,6 +86,62 @@ const Header: React.FC = () => {
             </Button>
           )}
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {showMobileMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 right-0 bg-white shadow-lg py-4 lg:hidden"
+            >
+              <div className="container mx-auto px-4 flex flex-col gap-2">
+                {user ? (
+                  <>
+                    <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100 mb-2">
+                      {user.email}
+                    </div>
+                    <button
+                      onClick={() => handleNavigation('/dashboard')}
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <User size={16} />
+                      Dashboard
+                    </button>
+                    <button
+                      onClick={() => handleNavigation('/quiz')}
+                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      <PlusCircle size={16} />
+                      New Tone
+                    </button>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setAuthMode('signin');
+                      setShowAuthModal(true);
+                      setShowMobileMenu(false);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                  >
+                    <LogIn size={16} />
+                    Sign In
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Auth Modal */}
