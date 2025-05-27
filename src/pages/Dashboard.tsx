@@ -99,7 +99,9 @@ const Dashboard: React.FC = () => {
               {user ? 'Your Saved Tones' : 'Writing Tone Dashboard'}
             </h1>
             <p className="text-gray-600 max-w-2xl">
-              Here you can manage your writing tones, create new ones, or edit existing ones. Each tone comes with a custom prompt that helps AI assistants match your style perfectly. Copy prompts directly to use with any AI writing tool, or duplicate and modify tones to create variations of your voice.
+              Create, manage, or modify your unique writing styles. 
+Each tone includes a tailored prompt, enabling AI writing assistants to perfectly replicate your style. 
+You can easily copy these prompts for use with any AI writing tool.
             </p>
           </div>
           
