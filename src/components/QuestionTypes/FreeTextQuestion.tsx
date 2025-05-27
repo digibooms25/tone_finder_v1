@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FreeTextQuestion as FreeTextQuestionType } from '../../lib/questions';
-import Button from '../Button';
 
 interface FreeTextQuestionProps {
   question: FreeTextQuestionType;
@@ -16,7 +15,6 @@ const FreeTextQuestion: React.FC<FreeTextQuestionProps> = ({
 }) => {
   const [answer, setAnswer] = useState(savedAnswer || '');
   const [wordCount, setWordCount] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
     if (savedAnswer) {
@@ -34,13 +32,10 @@ const FreeTextQuestion: React.FC<FreeTextQuestionProps> = ({
     const text = e.target.value;
     setAnswer(text);
     countWords(text);
-  };
-  
-  const handleSubmit = () => {
-    if (answer.trim()) {
-      setIsSubmitting(true);
-      onAnswerSubmitted(question.id, answer);
-      setIsSubmitting(false);
+    
+    // Auto-submit the answer as user types
+    if (text.trim()) {
+      onAnswerSubmitted(question.id, text);
     }
   };
   
@@ -69,14 +64,6 @@ const FreeTextQuestion: React.FC<FreeTextQuestionProps> = ({
           </span>
         </div>
       </div>
-      
-      <Button
-        onClick={handleSubmit}
-        disabled={!answer.trim() || wordCount > 50}
-        isLoading={isSubmitting}
-      >
-        {savedAnswer ? 'Update Answer' : 'Submit Answer'}
-      </Button>
     </motion.div>
   );
 };
