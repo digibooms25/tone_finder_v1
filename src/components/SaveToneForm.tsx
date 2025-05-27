@@ -4,10 +4,11 @@ import Button from './Button';
 interface SaveToneFormProps {
   onSave: (name: string) => Promise<void>;
   isLoading: boolean;
+  defaultName?: string;
 }
 
-const SaveToneForm: React.FC<SaveToneFormProps> = ({ onSave, isLoading }) => {
-  const [toneName, setToneName] = useState('My Tone');
+const SaveToneForm: React.FC<SaveToneFormProps> = ({ onSave, isLoading, defaultName }) => {
+  const [toneName, setToneName] = useState(defaultName || 'The Balanced Communicator');
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -153,7 +153,11 @@ const Results: React.FC = () => {
             
             {!toneId && (
               user ? (
-                <SaveToneForm onSave={handleSaveTone} isLoading={loading} />
+                <SaveToneForm 
+                  onSave={handleSaveTone} 
+                  isLoading={loading} 
+                  defaultName={currentTone.title}
+                />
               ) : (
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h3 className="text-lg font-semibold mb-4 text-gray-800">Save Your Tone</h3>
