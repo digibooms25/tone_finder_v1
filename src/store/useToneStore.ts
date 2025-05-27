@@ -21,6 +21,7 @@ type ToneState = {
   loading: boolean;
   error: string | null;
   isQuotaExceeded: boolean;
+  pendingSave: boolean;
   
   generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
@@ -33,6 +34,7 @@ type ToneState = {
   resetCurrentTone: () => void;
   clearError: () => void;
   hasUnsavedChanges: () => boolean;
+  setPendingSave: (pendingSave: boolean) => void;
 };
 
 const initialTraits = {
@@ -60,6 +62,9 @@ export const useToneStore = create<ToneState>()(
       loading: false,
       error: null,
       isQuotaExceeded: false,
+      pendingSave: false,
+      
+      setPendingSave: (pendingSave: boolean) => set({ pendingSave }),
       
       hasUnsavedChanges: () => {
         const { currentTone, savedTones } = get();
