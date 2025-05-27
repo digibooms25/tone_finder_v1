@@ -107,7 +107,7 @@ const Results: React.FC = () => {
   };
   
   const handleAuthSuccess = () => {
-    setShowAuthModal(false);
+    setShowAuthForm(false);
     // The pending save will be handled by the useEffect above
   };
   
@@ -205,7 +205,11 @@ const Results: React.FC = () => {
                   </button>
                 </div>
                 
-                <AuthForm mode={authMode} onSuccess={handleAuthSuccess} />
+                <AuthForm 
+                  mode={authMode} 
+                  onSuccess={handleAuthSuccess}
+                  setShowAuthModal={setShowAuthForm}
+                />
                 
                 <div className="mt-4 text-center text-sm">
                   {authMode === 'signin' ? (

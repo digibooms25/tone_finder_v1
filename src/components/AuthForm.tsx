@@ -5,9 +5,10 @@ import Button from './Button';
 interface AuthFormProps {
   mode: 'signin' | 'signup';
   onSuccess?: () => void;
+  setShowAuthModal?: (show: boolean) => void;
 }
 
-const AuthForm: React.FC<AuthFormProps> = ({ mode, onSuccess }) => {
+const AuthForm: React.FC<AuthFormProps> = ({ mode, onSuccess, setShowAuthModal }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { signIn, signUp, loading, error } = useAuthStore();
@@ -24,6 +25,9 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSuccess }) => {
       
       if (onSuccess) {
         onSuccess();
+      }
+      if (setShowAuthModal) {
+        setShowAuthModal(false);
       }
     } catch (err) {
       console.error('Authentication error:', err);
