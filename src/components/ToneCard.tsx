@@ -149,7 +149,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
             size="sm"
             icon={<MoreVertical size={16} />}
             onClick={() => !isRenaming && setShowMenu(!showMenu)}
-            className="text-gray-500 hover:text-blue-600"
+            className={`text-gray-500 hover:text-blue-600 ${isRenaming ? 'opacity-0' : ''}`}
             disabled={isRenaming}
           />
           
@@ -161,6 +161,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.1 }}
                 className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-40"
+                style={{ pointerEvents: isRenaming ? 'none' : 'auto' }}
               >
                 <button
                   onClick={startRename}
