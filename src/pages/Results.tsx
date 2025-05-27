@@ -30,6 +30,7 @@ const Results: React.FC = () => {
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [pendingSave, setPendingSave] = useState<string | null>(null);
   
   // Show loader immediately if coming from quiz
   useEffect(() => {
@@ -61,6 +62,24 @@ const Results: React.FC = () => {
       generateInitialResults();
     }
   }, [toneId, isGenerating]);
+
+  // Handle saving after successful authentication
+  useEffect(() => {
+    const handlePendingSave = async () => {
+      if (pendingSave && user) {
+        try {
+          await saveTone(pendingSave, user.id);
+          navigate('/dashboard');
+        } catch (error) {
+          console.error('Error saving tone:', error);
+        } finally {
+          setPendingSave(null);
+        }
+      }
+    };
+
+    handlePendingSave();
+  }, [user, pendingSave]);
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
@@ -80,6 +99,7 @@ const Results: React.FC = () => {
       await saveTone(name, user.id);
       navigate('/dashboard');
     } else {
+      setPendingSave(name);
       setShowAuthForm(true);
       setAuthMode('signup');
     }
@@ -87,6 +107,7 @@ const Results: React.FC = () => {
   
   const handleAuthSuccess = async () => {
     setShowAuthForm(false);
+    // The pending save will be handled by the useEffect above
   };
   
   const handleStartOver = () => {
