@@ -9,7 +9,7 @@ import { PlusCircle, LogOut } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { savedTones, loadSavedTones, deleteTone, loading } = useToneStore();
+  const { savedTones, loadSavedTones, deleteTone, loading, setCurrentToneFromProfile } = useToneStore();
   const { user, signOut } = useAuthStore();
   const [message, setMessage] = useState('');
   
@@ -33,6 +33,11 @@ const Dashboard: React.FC = () => {
     setTimeout(() => {
       setMessage('');
     }, 3000);
+  };
+
+  const handleEdit = (tone: ToneProfile) => {
+    setCurrentToneFromProfile(tone);
+    navigate(`/edit/${tone.id}`);
   };
   
   const handleNewTone = () => {
@@ -101,6 +106,7 @@ const Dashboard: React.FC = () => {
                   tone={tone}
                   onDelete={handleDelete}
                   onCopyPrompt={handleCopyPrompt}
+                  onEdit={handleEdit}
                 />
               </motion.div>
             ))}

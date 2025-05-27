@@ -5,6 +5,7 @@ import { generateToneSummary, generateToneExamples } from '../lib/openai';
 
 type ToneState = {
   currentTone: {
+    id?: string;
     formality: number;
     brevity: number;
     humor: number;
@@ -26,6 +27,8 @@ type ToneState = {
   loadSavedTones: (userId: string) => Promise<void>;
   deleteTone: (toneId: string) => Promise<void>;
   setCurrentToneTraits: (traits: Partial<typeof initialTraits>) => void;
+  setCurrentToneFromProfile: (tone: ToneProfile) => void;
+  updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
 };
 
 const initialTraits = {
@@ -146,6 +149,29 @@ export const useToneStore = create<ToneState>()(
         }
       },
       
+      updateTone: async (toneId: string, updates: Partial<ToneProfile>) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const { error } = await supabase
+            .from('tone_profiles')
+            .update(updates)
+            .eq('id', toneId);
+          
+          if (error) throw error;
+          
+          set((state) => ({
+            savedTones: state.savedTones.map((tone) =>
+              tone.id === toneId ? { ...tone, ...updates } : tone
+            ),
+          }));
+        } catch (error) {
+          set({ error: (error as Error).message });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      
       loadSavedTones: async (userId: string) => {
         try {
           set({ loading: true, error: null });
@@ -195,6 +221,24 @@ export const useToneStore = create<ToneState>()(
             ...traits,
           },
         }));
+      },
+      
+      setCurrentToneFromProfile: (tone) => {
+        set({
+          currentTone: {
+            id: tone.id,
+            formality: tone.formality,
+            brevity: tone.brevity,
+            humor: tone.humor,
+            warmth: tone.warmth,
+            directness: tone.directness,
+            expressiveness: tone.expressiveness,
+            title: tone.name,
+            summary: tone.summary,
+            prompt: tone.prompt,
+            examples: [],
+          },
+        });
       },
     }),
     {

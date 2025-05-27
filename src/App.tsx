@@ -31,6 +31,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/edit/:toneId" element={<Results />} />
             <Route 
               path="/dashboard" 
               element={user ? <Dashboard /> : <Navigate to="/" />} 
