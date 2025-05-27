@@ -5,7 +5,7 @@ import { useToneStore } from '../store/useToneStore';
 import { useAuthStore } from '../store/useAuthStore';
 import ToneCard from '../components/ToneCard';
 import Button from '../components/Button';
-import { PlusCircle, Sparkles } from 'lucide-react';
+import { PlusCircle, Sparkles, Brain, Wand2 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -60,58 +60,100 @@ const Dashboard: React.FC = () => {
   };
 
   const renderEmptyState = () => (
-    <div className="text-center py-16 bg-white rounded-lg shadow-md">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
-        className="max-w-md mx-auto px-6"
-      >
-        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Sparkles size={24} className="text-blue-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Discover Your Writing Voice
-        </h2>
-        <p className="text-gray-600 mb-8">
-          Take our quick tone test to understand your unique writing style. Get personalized insights and a custom prompt you can use with any AI writing assistant.
-        </p>
-        <div className="flex justify-center">
-          <Button
-            onClick={handleNewTone}
-            size="lg"
-            className="w-full sm:w-auto"
-            icon={<PlusCircle size={20} />}
+    <div className="relative overflow-hidden bg-white rounded-2xl shadow-xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-50" />
+      <div className="relative px-6 py-16">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="max-w-md mx-auto text-center"
+        >
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-8 transform -rotate-6 shadow-lg">
+            <Brain size={32} className="text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Discover Your Writing Voice
+          </h2>
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Take our quick tone test to understand your unique writing style. Get personalized insights and a custom prompt you can use with any AI writing assistant.
+          </p>
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            Start Tone Test
-          </Button>
-        </div>
-      </motion.div>
+            <Button
+              onClick={handleNewTone}
+              size="lg"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-xl"
+              icon={<PlusCircle size={20} />}
+            >
+              Start Tone Test
+            </Button>
+          </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
   
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex justify-between items-start mb-12">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transform rotate-12" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl transform -rotate-12" />
+      </div>
+
+      <div className="container mx-auto px-4 max-w-6xl relative">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-12">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {user ? 'Your Saved Tones' : 'Writing Tone Dashboard'}
-            </h1>
-            <p className="text-gray-600 max-w-2xl">
-              Create, manage, or modify your unique writing styles. 
-Each tone includes a tailored prompt, enabling AI writing assistants to perfectly replicate your style. 
-You can easily copy these prompts for use with any AI writing tool.
-            </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-flex items-center bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-sm mb-4">
+                <Wand2 className="text-purple-500 mr-2" size={18} />
+                <span className="text-gray-600">
+                  {user ? 'Your Tone Collection' : 'Writing Tone Dashboard'}
+                </span>
+              </div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                {user ? (
+                  <span>
+                    Your Saved Tones
+                    <motion.span
+                      className="inline-block ml-2"
+                      animate={{ rotate: [0, 15, -15, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      ✨
+                    </motion.span>
+                  </span>
+                ) : (
+                  'Writing Tone Dashboard'
+                )}
+              </h1>
+              <p className="text-gray-600 max-w-2xl leading-relaxed">
+                Create, manage, and modify your unique writing styles. Each tone includes a tailored prompt, enabling AI writing assistants to perfectly replicate your style.
+              </p>
+            </motion.div>
           </div>
           
-          <Button
-            variant="primary"
-            icon={<PlusCircle size={18} />}
-            onClick={handleNewTone}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            New Tone
-          </Button>
+            <Button
+              variant="primary"
+              icon={<PlusCircle size={18} />}
+              onClick={handleNewTone}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
+            >
+              New Tone
+            </Button>
+          </motion.div>
         </div>
         
         {message && (
@@ -119,7 +161,7 @@ You can easily copy these prompts for use with any AI writing tool.
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="bg-green-100 text-green-800 p-4 rounded-md mb-6"
+            className="bg-white/80 backdrop-blur-sm text-blue-800 p-4 rounded-xl mb-6 border border-blue-100 shadow-lg"
           >
             {message}
           </motion.div>
@@ -127,16 +169,16 @@ You can easily copy these prompts for use with any AI writing tool.
         
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="w-20 h-20 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
           </div>
         ) : user && savedTones.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {savedTones.map((tone) => (
+            {savedTones.map((tone, index) => (
               <motion.div
                 key={tone.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
               >
                 <ToneCard
                   tone={tone}
