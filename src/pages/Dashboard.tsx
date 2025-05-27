@@ -5,7 +5,7 @@ import { useToneStore } from '../store/useToneStore';
 import { useAuthStore } from '../store/useAuthStore';
 import ToneCard from '../components/ToneCard';
 import Button from '../components/Button';
-import { PlusCircle, LogOut, Sparkles } from 'lucide-react';
+import { PlusCircle, Sparkles } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Dashboard: React.FC = () => {
     loading, 
     setCurrentToneFromProfile 
   } = useToneStore();
-  const { user, signOut } = useAuthStore();
+  const { user } = useAuthStore();
   const [message, setMessage] = useState('');
   
   useEffect(() => {
@@ -57,11 +57,6 @@ const Dashboard: React.FC = () => {
   
   const handleNewTone = () => {
     navigate('/quiz');
-  };
-  
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
   };
 
   const renderEmptyState = () => (
@@ -110,24 +105,13 @@ const Dashboard: React.FC = () => {
             )}
           </div>
           
-          <div className="flex gap-4">
-            <Button
-              variant="primary"
-              icon={<PlusCircle size={18} />}
-              onClick={handleNewTone}
-            >
-              New Tone
-            </Button>
-            {user && (
-              <Button
-                variant="outline"
-                icon={<LogOut size={18} />}
-                onClick={handleSignOut}
-              >
-                Sign Out
-              </Button>
-            )}
-          </div>
+          <Button
+            variant="primary"
+            icon={<PlusCircle size={18} />}
+            onClick={handleNewTone}
+          >
+            New Tone
+          </Button>
         </div>
         
         {message && (
