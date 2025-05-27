@@ -105,7 +105,7 @@ const Results: React.FC = () => {
         </header>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <ToneSummary summary={currentTone.summary} />
+          <ToneSummary title={currentTone.title} summary={currentTone.summary} />
           
           <ToneAdjuster
             traits={{

@@ -11,6 +11,7 @@ type ToneState = {
     warmth: number;
     directness: number;
     expressiveness: number;
+    title: string;
     summary: string;
     prompt: string;
     examples: string[];
@@ -41,6 +42,7 @@ export const useToneStore = create<ToneState>()(
     (set, get) => ({
       currentTone: {
         ...initialTraits,
+        title: '',
         summary: '',
         prompt: '',
         examples: [],
@@ -62,11 +64,12 @@ export const useToneStore = create<ToneState>()(
             expressiveness: currentTone.expressiveness,
           };
           
-          const { summary, prompt } = await generateToneSummary(traits);
+          const { title, summary, prompt } = await generateToneSummary(traits);
           
           set((state) => ({
             currentTone: {
               ...state.currentTone,
+              title,
               summary,
               prompt,
             },

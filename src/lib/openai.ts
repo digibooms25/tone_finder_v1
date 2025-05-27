@@ -104,35 +104,35 @@ export const generateToneSummary = async (
     directness: number;
     expressiveness: number;
   }
-): Promise<{ summary: string; prompt: string }> => {
+): Promise<{ title: string; summary: string; prompt: string }> => {
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [
         {
           role: 'system',
-          content: `You are an expert at creating tone and style instructions. Generate a clear, specific prompt that will help AI writing assistants match the user's unique voice.
+          content: `You are an expert at creating tone and style instructions. Based on the user's trait scores, generate:
 
-Consider these trait scores (-1 to 1):
-- Formality: formal vs casual
-- Warmth: warm vs cool
-- Humor: playful vs serious
-- Brevity: concise vs detailed
-- Directness: direct vs indirect
-- Expressiveness: expressive vs reserved
+1. A unique, personalized title that captures their writing style essence
+   - Should be creative and specific to their traits
+   - Format: "The [Adjective] [Communicator/Writer/Voice]" or similar pattern
+   - Examples: 
+     - "The Empathetic Storyteller"
+     - "The Direct Problem-Solver"
+     - "The Engaging Conversationalist"
 
-Create a prompt that:
-1. Starts with: "Write in a tone that is..."
-2. Describes the key characteristics
-3. Provides specific examples or comparisons
-4. Is detailed but concise (100-150 words)
+2. A clear, specific prompt that will help AI writing assistants match their voice
+   - Start with: "Write in a tone that is..."
+   - Describe key characteristics
+   - Provide specific examples or comparisons
+   - Keep it detailed but concise (100-150 words)
 
-Also create a friendly, conversational summary that:
-- Highlights the unique aspects of their tone
-- Explains how traits work together
-- Suggests where this tone would be effective
+3. A friendly, conversational summary that:
+   - Highlights unique aspects of their tone
+   - Explains how traits work together
+   - Suggests where this tone would be effective
 
-Respond with a JSON object containing "summary" and "prompt" keys.`
+Respond with a JSON object containing "title", "summary", and "prompt" keys.`
         },
         {
           role: 'user',
@@ -150,6 +150,7 @@ Respond with a JSON object containing "summary" and "prompt" keys.`
   } catch (error) {
     console.error('Error generating tone summary:', error);
     return {
+      title: 'Your Writing Style Analysis',
       summary: 'We could not generate a summary of your tone at this time.',
       prompt: 'Write in a balanced, neutral tone.'
     };

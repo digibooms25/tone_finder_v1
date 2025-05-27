@@ -2,10 +2,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface ToneSummaryProps {
+  title: string;
   summary: string;
 }
 
-const ToneSummary: React.FC<ToneSummaryProps> = ({ summary }) => {
+const ToneSummary: React.FC<ToneSummaryProps> = ({ title, summary }) => {
   return (
     <motion.div 
       className="bg-white rounded-lg shadow-md p-6"
@@ -13,7 +14,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({ summary }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Writing Style Analysis</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
       <p className="text-gray-600 text-sm mb-4">A detailed breakdown of your unique tone and communication patterns.</p>
       
       {summary ? (
