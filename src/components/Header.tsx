@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import Button from './Button';
-import { LogIn, LogOut, User, Menu, X, PlusCircle } from 'lucide-react';
+import { LogIn, LogOut, User, Menu, X, PlusCircle, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
@@ -27,6 +27,16 @@ const Header: React.FC = () => {
   const handleNavigation = (path: string) => {
     navigate(path);
     setShowMenu(false);
+  };
+
+  const handleProtectedNavigation = (path: string) => {
+    if (user) {
+      handleNavigation(path);
+    } else {
+      setAuthMode('signin');
+      setShowAuthModal(true);
+      setShowMenu(false);
+    }
   };
   
   return (
@@ -55,33 +65,36 @@ const Header: React.FC = () => {
               className="absolute top-full left-0 right-0 bg-white shadow-lg py-4"
             >
               <div className="container mx-auto px-4 flex flex-col gap-2">
+                {user && (
+                  <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100 mb-2">
+                    {user.email}
+                  </div>
+                )}
+                
+                <button
+                  onClick={() => handleProtectedNavigation('/dashboard')}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                >
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </button>
+                
+                <button
+                  onClick={() => handleNavigation('/quiz')}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                >
+                  <PlusCircle size={16} />
+                  New Tone
+                </button>
+                
                 {user ? (
-                  <>
-                    <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100 mb-2">
-                      {user.email}
-                    </div>
-                    <button
-                      onClick={() => handleNavigation('/dashboard')}
-                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <User size={16} />
-                      Dashboard
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('/quiz')}
-                      className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    >
-                      <PlusCircle size={16} />
-                      New Tone
-                    </button>
-                    <button
-                      onClick={handleSignOut}
-                      className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut size={16} />
-                      Sign Out
-                    </button>
-                  </>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
                 ) : (
                   <button
                     onClick={() => {
