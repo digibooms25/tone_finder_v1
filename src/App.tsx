@@ -6,6 +6,9 @@ import Landing from './pages/Landing';
 import Quiz from './pages/Quiz';
 import Results from './pages/Results';
 import Dashboard from './pages/Dashboard';
+import ChatGPTGuide from './pages/guides/ChatGPTGuide';
+import ClaudeGuide from './pages/guides/ClaudeGuide';
+import GeminiGuide from './pages/guides/GeminiGuide';
 
 function App() {
   const { checkSession, loading } = useAuthStore();
@@ -33,6 +36,9 @@ function App() {
             <Route path="/results" element={<Results />} />
             <Route path="/edit/:toneId" element={<Results />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/guides/chatgpt" element={<ChatGPTGuide />} />
+            <Route path="/guides/claude" element={<ClaudeGuide />} />
+            <Route path="/guides/gemini" element={<GeminiGuide />} />
           </Routes>
         </main>
       </div>
