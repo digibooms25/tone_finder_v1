@@ -46,15 +46,17 @@ const Results: React.FC = () => {
     }
   }, [quizTraits, toneId]);
   
-  // Generate initial results
+  // Generate initial results only if coming from quiz
   useEffect(() => {
     const generateInitialResults = async () => {
-      if (!toneId && !currentTone.summary) {
+      if (!toneId && !currentTone.summary && location.state?.fromQuiz) {
         try {
           await generateContent();
         } finally {
           setIsGenerating(false);
         }
+      } else {
+        setIsGenerating(false);
       }
     };
     
@@ -105,7 +107,7 @@ const Results: React.FC = () => {
     }
   };
   
-  const handleAuthSuccess = async () => {
+  const handleAuthSuccess = () => {
     setShowAuthForm(false);
     // The pending save will be handled by the useEffect above
   };
