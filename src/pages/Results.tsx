@@ -8,7 +8,6 @@ import ToneSummary from '../components/ToneSummary';
 import ToneAdjuster from '../components/ToneAdjuster';
 import TonePreview from '../components/TonePreview';
 import CopyPromptButton from '../components/CopyPromptButton';
-import SaveToneForm from '../components/SaveToneForm';
 import Button from '../components/Button';
 import AuthForm from '../components/AuthForm';
 import AnalyzingLoader from '../components/AnalyzingLoader';
@@ -108,7 +107,7 @@ const Results: React.FC = () => {
   };
   
   const handleAuthSuccess = () => {
-    setShowAuthForm(false);
+    setShowAuthModal(false);
     // The pending save will be handled by the useEffect above
   };
   
@@ -149,13 +148,21 @@ const Results: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Left Column */}
           <div className="space-y-8">
-            <ToneSummary title={currentTone.title} summary={currentTone.summary} />
+            <ToneSummary 
+              title={currentTone.title} 
+              summary={currentTone.summary}
+              onSave={!toneId ? handleSaveTone : undefined}
+              isLoading={loading}
+              showSave={!toneId && currentTone.summary !== ''}
+              defaultName={currentTone.title}
+              isEditing={!!toneId}
+            />
             <TonePreview examples={currentTone.examples} />
             <CopyPromptButton prompt={currentTone.prompt} />
           </div>
           
           {/* Right Column */}
-          <div className="space-y-8">
+          <div>
             <ToneAdjuster
               traits={{
                 formality: currentTone.formality,
@@ -169,32 +176,6 @@ const Results: React.FC = () => {
               onRegenerate={handleRegenerate}
               isLoading={loading || isGenerating}
             />
-            
-            {!toneId && (
-              user ? (
-                <SaveToneForm 
-                  onSave={handleSaveTone} 
-                  isLoading={loading} 
-                  defaultName={currentTone.title}
-                />
-              ) : (
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <h3 className="text-lg font-semibold mb-4 text-gray-800">Save Your Tone</h3>
-                  <p className="text-gray-600 mb-6">
-                    Create an account to save your tone and access it anytime.
-                  </p>
-                  <Button
-                    onClick={() => {
-                      setShowAuthForm(true);
-                      setAuthMode('signup');
-                    }}
-                    className="w-full"
-                  >
-                    Sign Up to Save
-                  </Button>
-                </div>
-              )
-            )}
           </div>
         </div>
         
@@ -211,7 +192,7 @@ const Results: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-bold text-gray-900">
                     {authMode === 'signin' ? 'Sign In' : 'Create Account'}
