@@ -83,12 +83,22 @@ const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdi
       
       <div className="space-y-3">
         <Button
+          variant="primary"
+          size="sm"
+          className="w-full"
+          icon={<Copy size={16} />}
+          onClick={handleCopyPrompt}
+        >
+          Copy Prompt
+        </Button>
+        
+        <Button
           variant="text"
           size="sm"
           className="w-full flex items-center justify-between text-gray-700 hover:text-blue-600"
           onClick={() => setShowPrompt(!showPrompt)}
         >
-          <span>View Prompt</span>
+          <span>{showPrompt ? 'Hide Prompt' : 'View Prompt'}</span>
           {showPrompt ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </Button>
         
@@ -101,18 +111,9 @@ const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdi
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-700 mb-3">
+              <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-700">
                 {tone.prompt}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                icon={<Copy size={16} />}
-                onClick={handleCopyPrompt}
-              >
-                Copy Prompt
-              </Button>
             </motion.div>
           )}
         </AnimatePresence>
