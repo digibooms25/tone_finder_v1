@@ -11,6 +11,7 @@ import CopyPromptButton from '../components/CopyPromptButton';
 import SaveToneForm from '../components/SaveToneForm';
 import Button from '../components/Button';
 import AuthForm from '../components/AuthForm';
+import AnalyzingLoader from '../components/AnalyzingLoader';
 
 const Results: React.FC = () => {
   const navigate = useNavigate();
@@ -19,8 +20,7 @@ const Results: React.FC = () => {
   const { 
     currentTone,
     loading,
-    generateSummary,
-    generateExamples,
+    generateContent,
     saveTone,
     setCurrentToneTraits,
   } = useToneStore();
@@ -41,7 +41,12 @@ const Results: React.FC = () => {
   useEffect(() => {
     const generateInitialResults = async () => {
       if (!toneId && !currentTone.summary) {
-        await handleRegenerate();
+        setIsGenerating(true);
+        try {
+          await generateContent();
+        } finally {
+          setIsGenerating(false);
+        }
       }
     };
     
@@ -55,8 +60,7 @@ const Results: React.FC = () => {
   const handleRegenerate = async () => {
     setIsGenerating(true);
     try {
-      await generateSummary();
-      await generateExamples();
+      await generateContent();
     } finally {
       setIsGenerating(false);
     }
@@ -84,6 +88,10 @@ const Results: React.FC = () => {
   const handleSkipToHome = () => {
     navigate('/');
   };
+  
+  if (isGenerating) {
+    return <AnalyzingLoader />;
+  }
   
   return (
     <div className="min-h-screen bg-gray-50 py-12">
