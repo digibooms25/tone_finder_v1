@@ -29,12 +29,10 @@ const Results: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Set initial tone traits from quiz results
   useEffect(() => {
     setCurrentToneTraits(quizTraits);
   }, [quizTraits]);
   
-  // Generate initial summary and examples
   useEffect(() => {
     const generateInitialResults = async () => {
       if (!currentTone.summary) {
@@ -104,58 +102,53 @@ const Results: React.FC = () => {
           </motion.p>
         </header>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <ToneSummary title={currentTone.title} summary={currentTone.summary} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            <ToneSummary title={currentTone.title} summary={currentTone.summary} />
+            <TonePreview examples={currentTone.examples} />
+            <CopyPromptButton prompt={currentTone.prompt} />
+          </div>
           
-          <ToneAdjuster
-            traits={{
-              formality: currentTone.formality,
-              brevity: currentTone.brevity,
-              humor: currentTone.humor,
-              warmth: currentTone.warmth,
-              directness: currentTone.directness,
-              expressiveness: currentTone.expressiveness,
-            }}
-            onTraitsChange={handleTraitsChange}
-            onRegenerate={handleRegenerate}
-            isLoading={loading || isGenerating}
-          />
+          {/* Right Column */}
+          <div className="space-y-8">
+            <ToneAdjuster
+              traits={{
+                formality: currentTone.formality,
+                brevity: currentTone.brevity,
+                humor: currentTone.humor,
+                warmth: currentTone.warmth,
+                directness: currentTone.directness,
+                expressiveness: currentTone.expressiveness,
+              }}
+              onTraitsChange={handleTraitsChange}
+              onRegenerate={handleRegenerate}
+              isLoading={loading || isGenerating}
+            />
+            
+            {user ? (
+              <SaveToneForm onSave={handleSaveTone} isLoading={loading} />
+            ) : (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-800">Save Your Tone</h3>
+                <p className="text-gray-600 mb-6">
+                  Create an account to save your tone and access it anytime.
+                </p>
+                <Button
+                  onClick={() => {
+                    setShowAuthForm(true);
+                    setAuthMode('signup');
+                  }}
+                  className="w-full"
+                >
+                  Sign Up to Save
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         
-        <motion.div
-          className="mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <TonePreview examples={currentTone.examples} />
-        </motion.div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          <CopyPromptButton prompt={currentTone.prompt} />
-          
-          {user ? (
-            <SaveToneForm onSave={handleSaveTone} isLoading={loading} />
-          ) : (
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">Save Your Tone</h3>
-              <p className="text-gray-600 mb-6">
-                Create an account to save your tone and access it anytime.
-              </p>
-              <Button
-                onClick={() => {
-                  setShowAuthForm(true);
-                  setAuthMode('signup');
-                }}
-                className="w-full"
-              >
-                Sign Up to Save
-              </Button>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-12">
           <Button variant="outline" onClick={handleStartOver}>
             Take the Test Again
           </Button>
