@@ -71,7 +71,6 @@ const Results: React.FC = () => {
           console.error('Error saving tone:', error);
         }
         setPendingSave(null);
-        setShowAuthForm(false);
       }
     };
 
