@@ -32,18 +32,18 @@ const AnalyzingLoader: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-95 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center z-50">
       <div className="max-w-md w-full mx-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 rounded-2xl shadow-lg relative"
+          className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl relative"
         >
           {/* Circular Loader */}
           <div className="flex justify-center mb-8">
             <div className="relative w-24 h-24">
               <motion.div
-                className="absolute inset-0 border-4 border-blue-500 rounded-full"
+                className="absolute inset-0 border-4 border-gradient-to-r from-blue-600 to-blue-500 rounded-full"
                 style={{ borderTopColor: 'transparent' }}
                 animate={{ rotate: 360 }}
                 transition={{
@@ -53,7 +53,7 @@ const AnalyzingLoader: React.FC = () => {
                 }}
               />
               <motion.div
-                className="absolute inset-2 border-4 border-blue-300 rounded-full"
+                className="absolute inset-2 border-4 border-gradient-to-r from-blue-400 to-blue-300 rounded-full"
                 style={{ borderTopColor: 'transparent', borderLeftColor: 'transparent' }}
                 animate={{ rotate: -360 }}
                 transition={{
@@ -63,7 +63,7 @@ const AnalyzingLoader: React.FC = () => {
                 }}
               />
               <motion.div
-                className="absolute inset-4 border-4 border-blue-200 rounded-full"
+                className="absolute inset-4 border-4 border-gradient-to-r from-blue-300 to-blue-200 rounded-full"
                 style={{ borderTopColor: 'transparent', borderRightColor: 'transparent' }}
                 animate={{ rotate: 360 }}
                 transition={{
@@ -77,15 +77,21 @@ const AnalyzingLoader: React.FC = () => {
 
           {/* Phase Title */}
           <AnimatePresence mode="wait">
-            <motion.h2
+            <motion.div
               key={`title-${currentPhase}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="text-2xl font-bold text-gray-900 mb-3 text-center"
+              className="text-center mb-3"
             >
-              {phases[currentPhase].title}
-            </motion.h2>
+              <motion.div
+                className="inline-flex items-center bg-blue-100/80 backdrop-blur-sm px-4 py-2 rounded-full"
+              >
+                <span className="text-blue-800 font-medium">
+                  {phases[currentPhase].title}
+                </span>
+              </motion.div>
+            </motion.div>
           </AnimatePresence>
 
           {/* Phase Description */}
@@ -107,7 +113,9 @@ const AnalyzingLoader: React.FC = () => {
               <motion.div
                 key={index}
                 className={`w-2 h-2 rounded-full ${
-                  index === currentPhase ? 'bg-blue-600' : 'bg-gray-200'
+                  index === currentPhase 
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500' 
+                    : 'bg-gray-200'
                 }`}
                 animate={{
                   scale: index === currentPhase ? [1, 1.2, 1] : 1
