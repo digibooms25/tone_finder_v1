@@ -43,18 +43,20 @@ const Landing: React.FC = () => {
             Discover, adjust, and reuse your personal writing tone in minutes.
           </p>
           
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Button
-              size="lg"
-              onClick={handleStartTest}
-              className="px-10"
+          <div className="flex justify-center">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Start Tone Test
-            </Button>
-          </motion.div>
+              <Button
+                size="lg"
+                onClick={handleStartTest}
+                className="px-10"
+              >
+                Start Tone Test
+              </Button>
+            </motion.div>
+          </div>
         </motion.header>
         
         <motion.section 
@@ -116,7 +118,7 @@ const Landing: React.FC = () => {
         </motion.section>
         
         <motion.div 
-          className="text-center"
+          className="flex justify-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.7 }}
