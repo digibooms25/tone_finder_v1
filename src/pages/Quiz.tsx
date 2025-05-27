@@ -148,15 +148,17 @@ const Quiz: React.FC = () => {
         </motion.div>
         
         <div className="flex justify-between items-center">
-          <Button
-            onClick={handlePrevious}
-            disabled={currentQuestionIndex === 0}
-            variant="outline"
-            icon={<ChevronLeft size={18} />}
-            className="bg-white/80 backdrop-blur-sm hover:bg-white"
-          >
-            Previous
-          </Button>
+          {currentQuestionIndex > 0 ? (
+            <button
+              onClick={handlePrevious}
+              className="flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              <ChevronLeft size={20} className="mr-1" />
+              <span>Previous</span>
+            </button>
+          ) : (
+            <div /> {/* Empty div to maintain spacing */}
+          )}
           
           <Button
             onClick={isLastQuestion ? handleComplete : handleNext}
