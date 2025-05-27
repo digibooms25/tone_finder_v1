@@ -23,6 +23,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSuccess, setShowAuthModal }
         await signUp(email, password);
       }
       
+      if (setShowAuthModal) {
+        setShowAuthModal(false);
+      }
+      
       if (onSuccess) {
         onSuccess();
       }
