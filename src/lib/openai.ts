@@ -4,6 +4,7 @@ const openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 if (!openaiApiKey) {
   console.error('OpenAI API key is not set in environment variables');
+  throw new Error('OpenAI API key is required');
 }
 
 export const openai = new OpenAI({
@@ -22,6 +23,10 @@ export const scoreFreeTextResponse = async (
   directness: number;
   expressiveness: number;
 }> => {
+  if (!text.trim()) {
+    throw new Error('Text is required for scoring');
+  }
+
   try {
     const systemPrompt = `You are an expert at analyzing writing style and tone. Analyze the following text for these traits:
 
@@ -81,17 +86,21 @@ Respond with ONLY a JSON object containing the scores.`;
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(content);
+    const scores = JSON.parse(content);
+    
+    // Validate and normalize scores
+    const traits = ['formality', 'brevity', 'humor', 'warmth', 'directness', 'expressiveness'];
+    traits.forEach(trait => {
+      if (typeof scores[trait] !== 'number') {
+        throw new Error(`Invalid score for ${trait}`);
+      }
+      scores[trait] = Math.max(-1, Math.min(1, scores[trait]));
+    });
+
+    return scores;
   } catch (error) {
     console.error('Error scoring free text:', error);
-    return {
-      formality: 0,
-      brevity: 0,
-      humor: 0,
-      warmth: 0,
-      directness: 0,
-      expressiveness: 0
-    };
+    throw error;
   }
 };
 
@@ -148,6 +157,11 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
 
     const result = JSON.parse(content);
     
+    // Validate response format
+    if (!result.title || !result.summary || !result.prompt) {
+      throw new Error('Invalid response format from OpenAI');
+    }
+    
     // Ensure we never return a generic title
     if (result.title === 'Your Writing Style Analysis') {
       result.title = 'The Balanced Communicator';
@@ -156,11 +170,7 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
     return result;
   } catch (error) {
     console.error('Error generating tone summary:', error);
-    return {
-      title: 'The Balanced Communicator',
-      summary: 'We could not generate a summary of your tone at this time.',
-      prompt: 'Write in a balanced, neutral tone.'
-    };
+    throw error;
   }
 };
 
@@ -203,7 +213,8 @@ Respond with a JSON object containing an "examples" array with three strings.`
           role: 'user',
           content: JSON.stringify(traits)
         }
-      ]
+      ],
+      temperature: 0.7
     });
 
     const content = response.choices[0]?.message.content;
@@ -211,13 +222,16 @@ Respond with a JSON object containing an "examples" array with three strings.`
       throw new Error('No response from OpenAI');
     }
 
-    return JSON.parse(content).examples;
+    const result = JSON.parse(content);
+    
+    // Validate response format
+    if (!Array.isArray(result.examples) || result.examples.length !== 3) {
+      throw new Error('Invalid examples format from OpenAI');
+    }
+
+    return result.examples;
   } catch (error) {
     console.error('Error generating tone examples:', error);
-    return [
-      'This is an example of a professional email.',
-      'This is an example of a social media post.',
-      'This is an example of a customer service response.'
-    ];
+    throw error;
   }
 };
