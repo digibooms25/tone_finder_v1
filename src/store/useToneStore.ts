@@ -32,6 +32,7 @@ type ToneState = {
   updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
   resetCurrentTone: () => void;
   clearError: () => void;
+  hasUnsavedChanges: () => boolean;
 };
 
 const initialTraits = {
@@ -59,6 +60,31 @@ export const useToneStore = create<ToneState>()(
       loading: false,
       error: null,
       isQuotaExceeded: false,
+      
+      hasUnsavedChanges: () => {
+        const { currentTone, savedTones } = get();
+        
+        // If there's no ID, it's a new tone
+        if (!currentTone.id) return false;
+        
+        // Find the saved tone with matching ID
+        const savedTone = savedTones.find(tone => tone.id === currentTone.id);
+        if (!savedTone) return false;
+        
+        // Compare current values with saved values
+        return (
+          currentTone.formality !== savedTone.formality ||
+          currentTone.brevity !== savedTone.brevity ||
+          currentTone.humor !== savedTone.humor ||
+          currentTone.warmth !== savedTone.warmth ||
+          currentTone.directness !== savedTone.directness ||
+          currentTone.expressiveness !== savedTone.expressiveness ||
+          currentTone.title !== savedTone.name ||
+          currentTone.summary !== savedTone.summary ||
+          currentTone.prompt !== savedTone.prompt ||
+          JSON.stringify(currentTone.examples) !== JSON.stringify(savedTone.examples)
+        );
+      },
       
       generateContent: async () => {
         try {

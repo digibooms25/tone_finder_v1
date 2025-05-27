@@ -166,7 +166,7 @@ const Results: React.FC = () => {
               showSave={!toneId && currentTone.summary !== ''}
               defaultName={currentTone.title}
               isEditing={!!toneId}
-              hasChanges={hasUnsavedChanges()}
+              hasUnsavedChanges={hasUnsavedChanges()}
               isRegenerating={isGenerating}
             />
             <TonePreview examples={currentTone.examples} />
