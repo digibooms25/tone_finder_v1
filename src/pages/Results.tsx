@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuizStore } from '../store/useQuizStore';
 import { useToneStore } from '../store/useToneStore';
@@ -15,6 +15,7 @@ import AnalyzingLoader from '../components/AnalyzingLoader';
 
 const Results: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toneId } = useParams();
   const { traits: quizTraits, resetQuiz } = useQuizStore();
   const { 
@@ -30,6 +31,13 @@ const Results: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGenerating, setIsGenerating] = useState(false);
   
+  // Show loader immediately if coming from quiz
+  useEffect(() => {
+    if (location.state?.fromQuiz) {
+      setIsGenerating(true);
+    }
+  }, []);
+  
   // Set initial tone traits from quiz results when creating new tone
   useEffect(() => {
     if (!toneId) {
@@ -41,7 +49,6 @@ const Results: React.FC = () => {
   useEffect(() => {
     const generateInitialResults = async () => {
       if (!toneId && !currentTone.summary) {
-        setIsGenerating(true);
         try {
           await generateContent();
         } finally {
@@ -50,8 +57,10 @@ const Results: React.FC = () => {
       }
     };
     
-    generateInitialResults();
-  }, [toneId]);
+    if (isGenerating) {
+      generateInitialResults();
+    }
+  }, [toneId, isGenerating]);
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
