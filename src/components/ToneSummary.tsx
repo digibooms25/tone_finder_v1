@@ -11,8 +11,6 @@ interface ToneSummaryProps {
   showSave?: boolean;
   defaultName?: string;
   isEditing?: boolean;
-  hasChanges?: boolean;
-  isRegenerating?: boolean;
 }
 
 const ToneSummary: React.FC<ToneSummaryProps> = ({ 
@@ -23,8 +21,6 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
   showSave = false,
   defaultName,
   isEditing = false,
-  hasChanges = false,
-  isRegenerating = false,
 }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [toneName, setToneName] = useState(defaultName || title);
@@ -60,7 +56,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
           <h2 className="text-2xl font-bold text-gray-900">
             {title || 'The Balanced Communicator'}
           </h2>
-          {showSave && (
+          {showSave && !isEditing && (
             <button
               onClick={() => setIsRenaming(true)}
               className="p-2 text-gray-500 hover:text-blue-600 rounded-full transition-colors"
@@ -81,14 +77,13 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
         <div className="space-y-4">
           <p className="text-gray-700 leading-relaxed">{summary}</p>
           
-          {(showSave || isEditing) && (
+          {showSave && !isEditing && (
             <Button
               onClick={handleSubmit}
-              isLoading={isLoading && !isRegenerating}
-              disabled={!hasChanges}
+              isLoading={isLoading}
               className="w-full mt-6"
             >
-              {hasChanges ? 'Save Changes' : 'No Changes to Save'}
+              Save Tone
             </Button>
           )}
         </div>

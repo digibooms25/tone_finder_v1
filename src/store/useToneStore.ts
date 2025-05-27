@@ -21,9 +21,6 @@ type ToneState = {
   loading: boolean;
   error: string | null;
   isQuotaExceeded: boolean;
-  originalTone: ToneProfile | null;
-  hasRegenerated: boolean;
-  pendingSave: boolean;
   
   generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
@@ -35,8 +32,6 @@ type ToneState = {
   updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
   resetCurrentTone: () => void;
   clearError: () => void;
-  hasUnsavedChanges: () => boolean;
-  setPendingSave: (pending: boolean) => void;
 };
 
 const initialTraits = {
@@ -64,13 +59,6 @@ export const useToneStore = create<ToneState>()(
       loading: false,
       error: null,
       isQuotaExceeded: false,
-      originalTone: null,
-      hasRegenerated: false,
-      pendingSave: false,
-      
-      setPendingSave: (pending: boolean) => {
-        set({ pendingSave: pending });
-      },
       
       generateContent: async () => {
         try {
@@ -94,15 +82,34 @@ export const useToneStore = create<ToneState>()(
             throw new Error('Failed to generate content. Please try again.');
           }
           
+          const updates = {
+            title: summaryResult.title,
+            summary: summaryResult.summary,
+            prompt: summaryResult.prompt,
+            examples: examplesResult,
+          };
+          
+          // If we're in edit mode, auto-save the changes
+          if (currentTone.id) {
+            await get().updateTone(currentTone.id, {
+              name: updates.title,
+              summary: updates.summary,
+              prompt: updates.prompt,
+              examples: updates.examples,
+              formality: traits.formality,
+              brevity: traits.brevity,
+              humor: traits.humor,
+              warmth: traits.warmth,
+              directness: traits.directness,
+              expressiveness: traits.expressiveness,
+            });
+          }
+          
           set((state) => ({
             currentTone: {
               ...state.currentTone,
-              title: summaryResult.title,
-              summary: summaryResult.summary,
-              prompt: summaryResult.prompt,
-              examples: examplesResult,
+              ...updates,
             },
-            hasRegenerated: true,
           }));
         } catch (error) {
           if (error instanceof OpenAIQuotaError) {
@@ -128,56 +135,30 @@ export const useToneStore = create<ToneState>()(
           set({ loading: true, error: null });
           const { currentTone } = get();
           
-          const toneData = {
-            name: name || currentTone.title,
-            formality: currentTone.formality,
-            brevity: currentTone.brevity,
-            humor: currentTone.humor,
-            warmth: currentTone.warmth,
-            directness: currentTone.directness,
-            expressiveness: currentTone.expressiveness,
-            summary: currentTone.summary,
-            prompt: currentTone.prompt,
-            examples: currentTone.examples,
-          };
+          const { data, error } = await supabase
+            .from('tone_profiles')
+            .insert([{
+              user_id: userId,
+              name: name || currentTone.title,
+              formality: currentTone.formality,
+              brevity: currentTone.brevity,
+              humor: currentTone.humor,
+              warmth: currentTone.warmth,
+              directness: currentTone.directness,
+              expressiveness: currentTone.expressiveness,
+              summary: currentTone.summary,
+              prompt: currentTone.prompt,
+              examples: currentTone.examples,
+            }])
+            .select()
+            .single();
           
-          if (currentTone.id) {
-            const { data, error } = await supabase
-              .from('tone_profiles')
-              .update(toneData)
-              .eq('id', currentTone.id)
-              .select()
-              .single();
-            
-            if (error) throw error;
-            
-            if (data) {
-              set((state) => ({
-                savedTones: state.savedTones.map((tone) =>
-                  tone.id === currentTone.id ? data : tone
-                ),
-                originalTone: data,
-                hasRegenerated: false,
-                pendingSave: false,
-              }));
-            }
-          } else {
-            const { data, error } = await supabase
-              .from('tone_profiles')
-              .insert([{ ...toneData, user_id: userId }])
-              .select()
-              .single();
-            
-            if (error) throw error;
-            
-            if (data) {
-              set((state) => ({
-                savedTones: [...state.savedTones, data],
-                originalTone: data,
-                hasRegenerated: false,
-                pendingSave: false,
-              }));
-            }
+          if (error) throw error;
+          
+          if (data) {
+            set((state) => ({
+              savedTones: [...state.savedTones, data],
+            }));
           }
         } catch (error) {
           set({ error: (error as Error).message });
@@ -222,7 +203,6 @@ export const useToneStore = create<ToneState>()(
           
           set((state) => ({
             savedTones: state.savedTones.filter((tone) => tone.id !== toneId),
-            originalTone: state.originalTone?.id === toneId ? null : state.originalTone,
           }));
         } catch (error) {
           set({ error: (error as Error).message });
@@ -289,8 +269,6 @@ export const useToneStore = create<ToneState>()(
               savedTones: state.savedTones.map((tone) =>
                 tone.id === toneId ? data : tone
               ),
-              originalTone: state.originalTone?.id === toneId ? data : state.originalTone,
-              hasRegenerated: false,
             }));
           }
         } catch (error) {
@@ -307,7 +285,6 @@ export const useToneStore = create<ToneState>()(
             ...state.currentTone,
             ...traits,
           },
-          hasRegenerated: false,
         }));
       },
       
@@ -326,38 +303,7 @@ export const useToneStore = create<ToneState>()(
             prompt: tone.prompt,
             examples: tone.examples || [],
           },
-          originalTone: tone,
-          hasRegenerated: false,
-          pendingSave: false,
         });
-      },
-      
-      hasUnsavedChanges: () => {
-        const { currentTone, originalTone, hasRegenerated, pendingSave } = get();
-        
-        // If there's a pending save, always return true
-        if (pendingSave) {
-          return true;
-        }
-        
-        // For new tones, only require regeneration
-        if (!originalTone) {
-          return hasRegenerated;
-        }
-        
-        // For existing tones, check for actual changes
-        return hasRegenerated && (
-          currentTone.formality !== originalTone.formality ||
-          currentTone.brevity !== originalTone.brevity ||
-          currentTone.humor !== originalTone.humor ||
-          currentTone.warmth !== originalTone.warmth ||
-          currentTone.directness !== originalTone.directness ||
-          currentTone.expressiveness !== originalTone.expressiveness ||
-          currentTone.title !== originalTone.name ||
-          currentTone.summary !== originalTone.summary ||
-          currentTone.prompt !== originalTone.prompt ||
-          JSON.stringify(currentTone.examples) !== JSON.stringify(originalTone.examples)
-        );
       },
       
       resetCurrentTone: () => {
@@ -365,9 +311,6 @@ export const useToneStore = create<ToneState>()(
           currentTone: { ...initialToneState },
           error: null,
           isQuotaExceeded: false,
-          originalTone: null,
-          hasRegenerated: false,
-          pendingSave: false,
         });
       },
     }),
