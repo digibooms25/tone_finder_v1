@@ -31,6 +31,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
     e.preventDefault();
     if (onSave && toneName.trim()) {
       await onSave(toneName);
+      setIsRenaming(false);
     }
   };
   
