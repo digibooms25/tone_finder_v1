@@ -104,7 +104,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-start mb-4">
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 mr-4">
           {isRenaming ? (
             <div className="flex items-center gap-2">
               <input
@@ -118,20 +118,22 @@ const ToneCard: React.FC<ToneCardProps> = ({
                   if (e.key === 'Escape') cancelRename();
                 }}
               />
-              <button
-                onClick={handleRename}
-                className="p-1 text-green-600 hover:text-green-700"
-                title="Save"
-              >
-                <Check size={16} />
-              </button>
-              <button
-                onClick={cancelRename}
-                className="p-1 text-red-600 hover:text-red-700"
-                title="Cancel"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleRename}
+                  className="p-1.5 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors"
+                  title="Save"
+                >
+                  <Check size={16} />
+                </button>
+                <button
+                  onClick={cancelRename}
+                  className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                  title="Cancel"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col">
@@ -140,13 +142,15 @@ const ToneCard: React.FC<ToneCardProps> = ({
             </div>
           )}
         </div>
-        <div className="relative ml-4">
+        
+        <div className="relative">
           <Button
             variant="text"
             size="sm"
             icon={<MoreVertical size={16} />}
-            onClick={() => setShowMenu(!showMenu)}
+            onClick={() => !isRenaming && setShowMenu(!showMenu)}
             className="text-gray-500 hover:text-blue-600"
+            disabled={isRenaming}
           />
           
           <AnimatePresence>
@@ -156,7 +160,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.1 }}
-                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10"
+                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50"
               >
                 <button
                   onClick={startRename}
