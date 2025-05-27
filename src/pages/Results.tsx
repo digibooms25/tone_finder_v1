@@ -164,6 +164,7 @@ const Results: React.FC = () => {
               defaultName={currentTone.title}
               isEditing={!!toneId}
               hasChanges={hasUnsavedChanges()}
+              isRegenerating={isGenerating}
             />
             <TonePreview examples={currentTone.examples} />
             <CopyPromptButton prompt={currentTone.prompt} />
