@@ -157,7 +157,7 @@ const Quiz: React.FC = () => {
               <span>Previous</span>
             </button>
           ) : (
-            <div></div> {/* Empty div to maintain spacing */}
+            <div>{"/* Empty div to maintain spacing */"}</div>
           )}
           
           <Button
