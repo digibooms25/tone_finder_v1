@@ -25,7 +25,8 @@ const Landing: React.FC = () => {
           transition={{ duration: 0.6 }}
         >
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Turn your tone into a <span className="text-blue-600">signature style</span>
+            Turn your tone into a<br />
+            <span className="text-blue-600">signature style</span>
             <span className="inline-block ml-2">✨</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
