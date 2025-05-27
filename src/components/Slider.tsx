@@ -21,7 +21,7 @@ const Slider: React.FC<SliderProps> = ({
   displayLabels,
 }) => {
   const [localValue, setLocalValue] = useState(value);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   
   useEffect(() => {
     setLocalValue(value);
@@ -60,7 +60,7 @@ const Slider: React.FC<SliderProps> = ({
         <div className="flex items-center gap-2">
           <motion.span 
             className="text-sm text-gray-500"
-            animate={{ opacity: isHovered ? 1 : 0.7 }}
+            animate={{ opacity: isDragging ? 1 : 0.7 }}
           >
             {getFormattedValue()}
           </motion.span>
@@ -70,12 +70,24 @@ const Slider: React.FC<SliderProps> = ({
         </div>
       </div>
       
-      <div className="relative h-[15px] flex items-center">
+      <div 
+        className="relative h-12 flex items-center group"
+        onMouseDown={() => setIsDragging(true)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+      >
+        {/* Track background */}
         <div className="absolute w-full h-[2px] bg-gray-200 rounded-full" />
-        <div 
-          className="absolute h-[2px] bg-blue-600 rounded-full"
+        
+        {/* Filled track */}
+        <motion.div 
+          className="absolute h-[2px] bg-blue-600 rounded-full origin-left"
           style={{ width: `${getPercentage()}%` }}
+          animate={{ scale: isDragging ? [1, 1.02, 1] : 1 }}
+          transition={{ duration: 0.2 }}
         />
+        
+        {/* Hidden range input */}
         <input
           type="range"
           min={min}
@@ -83,14 +95,22 @@ const Slider: React.FC<SliderProps> = ({
           step={step}
           value={localValue}
           onChange={handleChange}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className="absolute w-full h-full opacity-0 cursor-pointer"
+          className="absolute w-full h-full opacity-0 cursor-pointer z-10"
         />
-        <div 
-          className="absolute w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-sm"
-          style={{ left: `${getPercentage()}%`, transform: 'translateX(-50%)' }}
+        
+        {/* Thumb */}
+        <motion.div 
+          className="absolute w-3 h-3 bg-white border-2 border-blue-600 rounded-full shadow-md transition-transform"
+          style={{ 
+            left: `${getPercentage()}%`,
+            transform: `translateX(-50%) scale(${isDragging ? 1.2 : 1})`
+          }}
+          animate={{ scale: isDragging ? 1.2 : 1 }}
+          transition={{ duration: 0.2 }}
         />
+        
+        {/* Hover track */}
+        <div className="absolute w-full h-12 -top-5 opacity-0" />
       </div>
       
       {displayLabels && (
