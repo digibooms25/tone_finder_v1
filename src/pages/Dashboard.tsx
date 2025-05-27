@@ -98,11 +98,6 @@ const Dashboard: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               {user ? 'Your Saved Tones' : 'Writing Tone Dashboard'}
             </h1>
-            {user && (
-              <p className="text-gray-600">
-                Signed in as {user.email}
-              </p>
-            )}
           </div>
           
           <Button
