@@ -123,7 +123,7 @@ export const useToneStore = create<ToneState>()(
           
           // If we have an ID, update the existing tone
           if (currentTone.id) {
-            await get().updateTone(currentTone.id, {
+            const updates = {
               name: name || currentTone.title,
               formality: currentTone.formality,
               brevity: currentTone.brevity,
@@ -134,8 +134,22 @@ export const useToneStore = create<ToneState>()(
               summary: currentTone.summary,
               prompt: currentTone.prompt,
               examples: currentTone.examples,
-            });
-            set({ hasRegenerated: false });
+            };
+            
+            const { error } = await supabase
+              .from('tone_profiles')
+              .update(updates)
+              .eq('id', currentTone.id);
+            
+            if (error) throw error;
+            
+            set((state) => ({
+              savedTones: state.savedTones.map((tone) =>
+                tone.id === currentTone.id ? { ...tone, ...updates } : tone
+              ),
+              hasRegenerated: false,
+            }));
+            
             return;
           }
           
@@ -166,47 +180,6 @@ export const useToneStore = create<ToneState>()(
               savedTones: [...state.savedTones, data[0] as ToneProfile],
               originalTone: data[0] as ToneProfile,
               hasRegenerated: false,
-            }));
-          }
-        } catch (error) {
-          set({ error: (error as Error).message });
-          throw error;
-        } finally {
-          set({ loading: false });
-        }
-      },
-      
-      duplicateTone: async (toneId: string, userId: string) => {
-        try {
-          set({ loading: true, error: null });
-          
-          const toneToDuplicate = get().savedTones.find(tone => tone.id === toneId);
-          if (!toneToDuplicate) throw new Error('Tone not found');
-          
-          const { data, error } = await supabase
-            .from('tone_profiles')
-            .insert([
-              {
-                user_id: userId,
-                name: `${toneToDuplicate.name} (Copy)`,
-                formality: toneToDuplicate.formality,
-                brevity: toneToDuplicate.brevity,
-                humor: toneToDuplicate.humor,
-                warmth: toneToDuplicate.warmth,
-                directness: toneToDuplicate.directness,
-                expressiveness: toneToDuplicate.expressiveness,
-                summary: toneToDuplicate.summary,
-                prompt: toneToDuplicate.prompt,
-                examples: toneToDuplicate.examples,
-              },
-            ])
-            .select();
-          
-          if (error) throw error;
-          
-          if (data) {
-            set((state) => ({
-              savedTones: [...state.savedTones, data[0] as ToneProfile],
             }));
           }
         } catch (error) {
@@ -254,6 +227,47 @@ export const useToneStore = create<ToneState>()(
           }));
         } catch (error) {
           set({ error: (error as Error).message });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      
+      duplicateTone: async (toneId: string, userId: string) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const toneToDuplicate = get().savedTones.find(tone => tone.id === toneId);
+          if (!toneToDuplicate) throw new Error('Tone not found');
+          
+          const { data, error } = await supabase
+            .from('tone_profiles')
+            .insert([
+              {
+                user_id: userId,
+                name: `${toneToDuplicate.name} (Copy)`,
+                formality: toneToDuplicate.formality,
+                brevity: toneToDuplicate.brevity,
+                humor: toneToDuplicate.humor,
+                warmth: toneToDuplicate.warmth,
+                directness: toneToDuplicate.directness,
+                expressiveness: toneToDuplicate.expressiveness,
+                summary: toneToDuplicate.summary,
+                prompt: toneToDuplicate.prompt,
+                examples: toneToDuplicate.examples,
+              },
+            ])
+            .select();
+          
+          if (error) throw error;
+          
+          if (data) {
+            set((state) => ({
+              savedTones: [...state.savedTones, data[0] as ToneProfile],
+            }));
+          }
+        } catch (error) {
+          set({ error: (error as Error).message });
+          throw error;
         } finally {
           set({ loading: false });
         }
