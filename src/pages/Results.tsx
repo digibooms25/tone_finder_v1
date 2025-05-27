@@ -62,7 +62,7 @@ const Results: React.FC = () => {
   }, [toneId, isGenerating]);
 
   useEffect(() => {
-    const handlePendingSave = async () => {
+    const savePendingTone = async () => {
       if (pendingSave && user) {
         try {
           await saveTone(pendingSave, user.id);
@@ -75,7 +75,7 @@ const Results: React.FC = () => {
       }
     };
 
-    handlePendingSave();
+    savePendingTone();
   }, [user, pendingSave]);
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
@@ -100,10 +100,6 @@ const Results: React.FC = () => {
       setShowAuthForm(true);
       setAuthMode('signup');
     }
-  };
-  
-  const handleAuthSuccess = () => {
-    // The pending save will be handled by the useEffect above
   };
   
   const handleStartOver = () => {
@@ -199,8 +195,7 @@ const Results: React.FC = () => {
                 </div>
                 
                 <AuthForm 
-                  mode={authMode} 
-                  onSuccess={handleAuthSuccess}
+                  mode={authMode}
                   setShowAuthModal={setShowAuthForm}
                 />
                 
