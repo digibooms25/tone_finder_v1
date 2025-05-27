@@ -1,0 +1,123 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useToneStore } from '../store/useToneStore';
+import { useAuthStore } from '../store/useAuthStore';
+import ToneCard from '../components/ToneCard';
+import Button from '../components/Button';
+import { PlusCircle, LogOut } from 'lucide-react';
+
+const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { savedTones, loadSavedTones, deleteTone, loading } = useToneStore();
+  const { user, signOut } = useAuthStore();
+  const [message, setMessage] = useState('');
+  
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    
+    loadSavedTones(user.id);
+  }, [user]);
+  
+  const handleDelete = async (id: string) => {
+    await deleteTone(id);
+  };
+  
+  const handleCopyPrompt = (prompt: string) => {
+    navigator.clipboard.writeText(prompt);
+    setMessage('Prompt copied to clipboard!');
+    
+    setTimeout(() => {
+      setMessage('');
+    }, 3000);
+  };
+  
+  const handleNewTone = () => {
+    navigate('/quiz');
+  };
+  
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+  
+  return (
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="flex justify-between items-center mb-12">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Saved Tones</h1>
+            <p className="text-gray-600">
+              {user?.email && `Signed in as ${user.email}`}
+            </p>
+          </div>
+          
+          <div className="flex gap-4">
+            <Button
+              variant="primary"
+              icon={<PlusCircle size={18} />}
+              onClick={handleNewTone}
+            >
+              New Tone
+            </Button>
+            <Button
+              variant="outline"
+              icon={<LogOut size={18} />}
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
+          </div>
+        </div>
+        
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="bg-green-100 text-green-800 p-4 rounded-md mb-6"
+          >
+            {message}
+          </motion.div>
+        )}
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : savedTones.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {savedTones.map((tone) => (
+              <motion.div
+                key={tone.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ToneCard
+                  tone={tone}
+                  onDelete={handleDelete}
+                  onCopyPrompt={handleCopyPrompt}
+                />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white rounded-lg shadow-md">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <PlusCircle size={24} className="text-blue-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">No tones saved yet</h2>
+            <p className="text-gray-600 mb-6">Take the tone test to discover and save your unique writing style.</p>
+            <Button onClick={handleNewTone}>Start Tone Test</Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
