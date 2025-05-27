@@ -56,7 +56,7 @@ const Landing: React.FC = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Take a 5-minute test to discover your unique voice and make every word authentically yours.
+            Take a 5-minute test to discover your unique voice, and get a custom tone prompt you can use anywhere.
           </p>
 
           <motion.div
@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
               size="lg"
               onClick={handleStartTest}
               className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
+              icon={<ArrowRight className="ml-2" size={24} />}
               iconPosition="right"
             >
               Start Your Journey
