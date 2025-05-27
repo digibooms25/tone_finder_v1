@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToneProfile } from '../lib/supabase';
 import Button from './Button';
-import { MoreVertical, Edit2, Trash2, Copy, Files, ChevronDown, ChevronUp } from 'lucide-react';
+import { MoreVertical, Edit2, Trash2, Copy, Files, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 
 interface ToneCardProps {
   tone: ToneProfile;
@@ -10,6 +10,7 @@ interface ToneCardProps {
   onCopyPrompt: (prompt: string) => void;
   onDuplicate: (id: string) => Promise<void>;
   onEdit?: (tone: ToneProfile) => void;
+  onRename?: (id: string, newName: string) => Promise<void>;
 }
 
 const ToneCard: React.FC<ToneCardProps> = ({ 
@@ -17,12 +18,15 @@ const ToneCard: React.FC<ToneCardProps> = ({
   onDelete, 
   onCopyPrompt, 
   onDuplicate,
-  onEdit 
+  onEdit,
+  onRename
 }) => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newName, setNewName] = useState(tone.name);
   
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -62,6 +66,30 @@ const ToneCard: React.FC<ToneCardProps> = ({
       setShowMenu(false);
     }
   };
+
+  const startRename = () => {
+    setNewName(tone.name);
+    setIsRenaming(true);
+    setShowMenu(false);
+  };
+
+  const handleRename = async () => {
+    if (onRename && newName.trim() && newName !== tone.name) {
+      try {
+        await onRename(tone.id, newName.trim());
+      } finally {
+        setIsRenaming(false);
+      }
+    } else {
+      setIsRenaming(false);
+      setNewName(tone.name);
+    }
+  };
+
+  const cancelRename = () => {
+    setIsRenaming(false);
+    setNewName(tone.name);
+  };
   
   // Create a visualization of the tone traits
   const traitBars = [
@@ -76,11 +104,43 @@ const ToneCard: React.FC<ToneCardProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800">{tone.name}</h3>
-          <span className="text-xs text-gray-500">{formatDate(tone.created_at)}</span>
+        <div className="flex-1 min-w-0">
+          {isRenaming ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="flex-1 px-2 py-1 text-lg font-semibold text-gray-800 border-b-2 border-blue-500 focus:outline-none"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRename();
+                  if (e.key === 'Escape') cancelRename();
+                }}
+              />
+              <button
+                onClick={handleRename}
+                className="p-1 text-green-600 hover:text-green-700"
+                title="Save"
+              >
+                <Check size={16} />
+              </button>
+              <button
+                onClick={cancelRename}
+                className="p-1 text-red-600 hover:text-red-700"
+                title="Cancel"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <h3 className="text-lg font-semibold text-gray-800 truncate">{tone.name}</h3>
+              <span className="text-xs text-gray-500">{formatDate(tone.created_at)}</span>
+            </div>
+          )}
         </div>
-        <div className="relative">
+        <div className="relative ml-4">
           <Button
             variant="text"
             size="sm"
@@ -98,13 +158,20 @@ const ToneCard: React.FC<ToneCardProps> = ({
                 transition={{ duration: 0.1 }}
                 className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-10"
               >
+                <button
+                  onClick={startRename}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Edit2 size={14} />
+                  Rename
+                </button>
                 {onEdit && (
                   <button
                     onClick={handleEdit}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                   >
                     <Edit2 size={14} />
-                    Edit
+                    Edit Tone
                   </button>
                 )}
                 <button

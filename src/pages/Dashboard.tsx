@@ -14,6 +14,7 @@ const Dashboard: React.FC = () => {
     loadSavedTones, 
     deleteTone, 
     duplicateTone,
+    updateTone,
     loading, 
     setCurrentToneFromProfile 
   } = useToneStore();
@@ -49,6 +50,12 @@ const Dashboard: React.FC = () => {
   const handleEdit = (tone: ToneProfile) => {
     setCurrentToneFromProfile(tone);
     navigate(`/edit/${tone.id}`);
+  };
+
+  const handleRename = async (id: string, newName: string) => {
+    await updateTone(id, { name: newName });
+    setMessage('Tone renamed successfully!');
+    setTimeout(() => setMessage(''), 3000);
   };
   
   const handleNewTone = () => {
@@ -119,6 +126,7 @@ const Dashboard: React.FC = () => {
                   onDuplicate={handleDuplicate}
                   onCopyPrompt={handleCopyPrompt}
                   onEdit={handleEdit}
+                  onRename={handleRename}
                 />
               </motion.div>
             ))}
