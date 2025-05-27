@@ -88,7 +88,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
               disabled={!hasChanges}
               className="w-full mt-6"
             >
-              {hasChanges ? 'Save Tone' : 'Regenerate to save'}
+              {hasChanges ? 'Save Changes' : 'No Changes to Save'}
             </Button>
           )}
         </div>
