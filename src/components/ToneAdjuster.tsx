@@ -43,14 +43,12 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
   };
   
   const handleRegenerate = async () => {
-    if (hasChanges) {
-      setIsRegenerating(true);
-      try {
-        await onRegenerate();
-        setHasChanges(false);
-      } finally {
-        setIsRegenerating(false);
-      }
+    setIsRegenerating(true);
+    try {
+      await onRegenerate();
+      setHasChanges(false);
+    } finally {
+      setIsRegenerating(false);
     }
   };
   
@@ -89,10 +87,9 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
         <Button
           onClick={handleRegenerate}
           isLoading={isLoading || isRegenerating}
-          disabled={!hasChanges || isLoading || isRegenerating}
           className="w-full"
         >
-          {hasChanges ? 'Regenerate Content' : 'No Changes to Regenerate'}
+          Regenerate Tone
         </Button>
       </div>
     </motion.div>
