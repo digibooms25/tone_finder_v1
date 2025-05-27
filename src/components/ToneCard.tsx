@@ -171,8 +171,17 @@ const ToneCard: React.FC<ToneCardProps> = ({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="bg-gray-50 p-4 rounded-md text-sm text-gray-700 mt-2">
-              {tone.prompt}
+            <div className="relative bg-gray-50 p-4 rounded-md mt-2">
+              <div className="text-sm text-gray-700 pr-8">
+                {tone.prompt}
+              </div>
+              <button
+                onClick={() => onCopyPrompt(tone.prompt)}
+                className="absolute top-3 right-3 p-1.5 text-gray-500 hover:text-blue-600 rounded-md hover:bg-gray-100 transition-colors"
+                title="Copy prompt"
+              >
+                <Copy size={14} />
+              </button>
             </div>
           </motion.div>
         )}
