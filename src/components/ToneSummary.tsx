@@ -78,7 +78,7 @@ const ToneSummary: React.FC<ToneSummaryProps> = ({
         <div className="space-y-4">
           <p className="text-gray-700 leading-relaxed">{summary}</p>
           
-          {showSave && (
+          {(showSave || isEditing) && (
             <Button
               onClick={handleSubmit}
               isLoading={isLoading}
