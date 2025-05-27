@@ -143,10 +143,14 @@ export const useToneStore = create<ToneState>()(
             
             if (error) throw error;
             
+            // Update both savedTones and originalTone to reflect the changes
+            const updatedTone = { ...get().originalTone, ...updates } as ToneProfile;
+            
             set((state) => ({
               savedTones: state.savedTones.map((tone) =>
-                tone.id === currentTone.id ? { ...tone, ...updates } : tone
+                tone.id === currentTone.id ? updatedTone : tone
               ),
+              originalTone: updatedTone,
               hasRegenerated: false,
             }));
             
