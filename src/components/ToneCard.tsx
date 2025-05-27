@@ -83,16 +83,6 @@ const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdi
       
       <div className="space-y-3">
         <Button
-          variant="primary"
-          size="sm"
-          className="w-full"
-          icon={<Copy size={16} />}
-          onClick={handleCopyPrompt}
-        >
-          Copy Prompt
-        </Button>
-        
-        <Button
           variant="text"
           size="sm"
           className="w-full flex items-center justify-between text-gray-700 hover:text-blue-600"
@@ -117,6 +107,16 @@ const ToneCard: React.FC<ToneCardProps> = ({ tone, onDelete, onCopyPrompt, onEdi
             </motion.div>
           )}
         </AnimatePresence>
+
+        <Button
+          variant="primary"
+          size="sm"
+          className="w-full"
+          icon={<Copy size={16} />}
+          onClick={handleCopyPrompt}
+        >
+          Copy Prompt
+        </Button>
         
         <Button
           variant="outline"
