@@ -9,6 +9,7 @@ import MultiSelectQuestion from '../components/QuestionTypes/MultiSelectQuestion
 import AnalyzingLoader from '../components/AnalyzingLoader';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
+import { useToneStore } from '../store/useToneStore';
 import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
 const Quiz: React.FC = () => {
@@ -23,8 +24,14 @@ const Quiz: React.FC = () => {
     setAnswer,
     calculateTraits,
   } = useQuizStore();
+  const { resetCurrentTone } = useToneStore();
   
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  // Reset current tone when starting a new quiz
+  useEffect(() => {
+    resetCurrentTone();
+  }, []);
   
   useEffect(() => {
     if (isComplete) {

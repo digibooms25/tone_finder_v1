@@ -29,6 +29,7 @@ type ToneState = {
   setCurrentToneTraits: (traits: Partial<typeof initialTraits>) => void;
   setCurrentToneFromProfile: (tone: ToneProfile) => void;
   updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
+  resetCurrentTone: () => void;
 };
 
 const initialTraits = {
@@ -40,16 +41,18 @@ const initialTraits = {
   expressiveness: 0,
 };
 
+const initialToneState = {
+  ...initialTraits,
+  title: '',
+  summary: '',
+  prompt: '',
+  examples: [],
+};
+
 export const useToneStore = create<ToneState>()(
   persist(
     (set, get) => ({
-      currentTone: {
-        ...initialTraits,
-        title: '',
-        summary: '',
-        prompt: '',
-        examples: [],
-      },
+      currentTone: { ...initialToneState },
       savedTones: [],
       loading: false,
       error: null,
@@ -244,6 +247,12 @@ export const useToneStore = create<ToneState>()(
             prompt: tone.prompt,
             examples: tone.examples || [],
           },
+        });
+      },
+
+      resetCurrentTone: () => {
+        set({
+          currentTone: { ...initialToneState },
         });
       },
     }),
