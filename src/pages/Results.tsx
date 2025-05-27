@@ -26,6 +26,7 @@ const Results: React.FC = () => {
     saveTone,
     setCurrentToneTraits,
     clearError,
+    hasUnsavedChanges,
   } = useToneStore();
   const { user } = useAuthStore();
   
@@ -87,7 +88,6 @@ const Results: React.FC = () => {
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
-    setHasChanges(true);
   };
   
   const handleRegenerate = async () => {
@@ -95,6 +95,7 @@ const Results: React.FC = () => {
     setIsGenerating(true);
     try {
       await generateContent();
+      setHasChanges(true);
     } finally {
       setIsGenerating(false);
     }
