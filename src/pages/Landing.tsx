@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
               size="lg"
               onClick={handleStartTest}
               className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
+              icon={<ArrowRight className="ml-2" size={24} />}
               iconPosition="right"
             >
               Start Your Journey
@@ -192,19 +192,25 @@ const Landing: React.FC = () => {
                 icon: <MessageCircle size={28} />,
                 title: "ChatGPT Guide",
                 description: "Learn three ways to use your tone with ChatGPT: conversation prompts, system instructions, and project settings.",
-                link: "/guides/chatgpt"
+                link: "/guides/chatgpt",
+                gradient: "from-emerald-400 to-teal-500",
+                hoverGradient: "from-emerald-500 to-teal-600"
               },
               {
                 icon: <Bot size={28} />,
                 title: "Claude Guide",
                 description: "Master Claude's unique features to maintain your writing style across conversations and documents.",
-                link: "/guides/claude"
+                link: "/guides/claude",
+                gradient: "from-purple-400 to-indigo-500",
+                hoverGradient: "from-purple-500 to-indigo-600"
               },
               {
                 icon: <Cpu size={28} />,
                 title: "Gemini Guide",
                 description: "Integrate your tone seamlessly with Google's Gemini for consistent communication.",
-                link: "/guides/gemini"
+                link: "/guides/gemini",
+                gradient: "from-rose-400 to-pink-500",
+                hoverGradient: "from-rose-500 to-pink-600"
               }
             ].map((guide, index) => (
               <motion.div
@@ -216,15 +222,14 @@ const Landing: React.FC = () => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 onClick={() => navigate(guide.link)}
               >
-                <div className="h-full p-8 rounded-2xl bg-white/80 backdrop-blur-sm border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300" />
-                  <div className="relative">
-                    <div className="bg-blue-100 text-blue-600 p-4 rounded-xl inline-block mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className={`h-full p-8 rounded-2xl bg-gradient-to-br ${guide.gradient} group-hover:${guide.hoverGradient} transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-[1.02] shadow-xl`}>
+                  <div className="relative text-white">
+                    <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6 group-hover:scale-110 transition-transform duration-300">
                       {guide.icon}
                     </div>
-                    <h3 className="text-xl font-bold mb-4 text-gray-900">{guide.title}</h3>
-                    <p className="text-gray-600 leading-relaxed mb-6">{guide.description}</p>
-                    <div className="flex items-center text-blue-600 font-medium">
+                    <h3 className="text-xl font-bold mb-4">{guide.title}</h3>
+                    <p className="leading-relaxed mb-6 opacity-90">{guide.description}</p>
+                    <div className="flex items-center font-medium">
                       <span>View Guide</span>
                       <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
