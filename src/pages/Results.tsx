@@ -34,7 +34,6 @@ const Results: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGenerating, setIsGenerating] = useState(false);
   const [pendingSave, setPendingSave] = useState<string | null>(null);
-  const [hasChanges, setHasChanges] = useState(false);
   
   useEffect(() => {
     if (location.state?.fromQuiz) {
@@ -53,7 +52,6 @@ const Results: React.FC = () => {
       if (!toneId && !currentTone.summary && location.state?.fromQuiz) {
         try {
           await generateContent();
-          setHasChanges(true);
         } catch (error) {
           // Error is handled by the store
         } finally {
@@ -74,7 +72,6 @@ const Results: React.FC = () => {
       if (pendingSave && user) {
         try {
           await saveTone(pendingSave, user.id);
-          setHasChanges(false);
           navigate('/dashboard');
         } catch (error) {
           console.error('Error saving tone:', error);
@@ -95,7 +92,6 @@ const Results: React.FC = () => {
     setIsGenerating(true);
     try {
       await generateContent();
-      setHasChanges(true);
     } finally {
       setIsGenerating(false);
     }
@@ -104,7 +100,6 @@ const Results: React.FC = () => {
   const handleSaveTone = async (name: string) => {
     if (user) {
       await saveTone(name, user.id);
-      setHasChanges(false);
       navigate('/dashboard');
     } else {
       setPendingSave(name);
@@ -168,7 +163,7 @@ const Results: React.FC = () => {
               showSave={!toneId && currentTone.summary !== ''}
               defaultName={currentTone.title}
               isEditing={!!toneId}
-              hasChanges={hasChanges}
+              hasChanges={hasUnsavedChanges()}
             />
             <TonePreview examples={currentTone.examples} />
             <CopyPromptButton prompt={currentTone.prompt} />
@@ -218,7 +213,7 @@ const Results: React.FC = () => {
                 </div>
                 
                 <AuthForm 
-                  mode={authMode}
+                  mode={authMode} 
                   setShowAuthModal={setShowAuthForm}
                 />
                 
