@@ -22,6 +22,7 @@ type ToneState = {
   error: string | null;
   isQuotaExceeded: boolean;
   originalTone: ToneProfile | null;
+  hasRegenerated: boolean;
   
   generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
@@ -62,6 +63,7 @@ export const useToneStore = create<ToneState>()(
       error: null,
       isQuotaExceeded: false,
       originalTone: null,
+      hasRegenerated: false,
       
       generateContent: async () => {
         try {
@@ -93,6 +95,7 @@ export const useToneStore = create<ToneState>()(
               prompt: summaryResult.prompt,
               examples: examplesResult,
             },
+            hasRegenerated: true,
           }));
         } catch (error) {
           if (error instanceof OpenAIQuotaError) {
@@ -132,6 +135,7 @@ export const useToneStore = create<ToneState>()(
               prompt: currentTone.prompt,
               examples: currentTone.examples,
             });
+            set({ hasRegenerated: false });
             return;
           }
           
@@ -161,6 +165,7 @@ export const useToneStore = create<ToneState>()(
             set((state) => ({
               savedTones: [...state.savedTones, data[0] as ToneProfile],
               originalTone: data[0] as ToneProfile,
+              hasRegenerated: false,
             }));
           }
         } catch (error) {
@@ -272,6 +277,7 @@ export const useToneStore = create<ToneState>()(
             originalTone: state.originalTone?.id === toneId ? 
               { ...state.originalTone, ...updates } : 
               state.originalTone,
+            hasRegenerated: false,
           }));
         } catch (error) {
           set({ error: (error as Error).message });
@@ -306,25 +312,13 @@ export const useToneStore = create<ToneState>()(
             examples: tone.examples || [],
           },
           originalTone: tone,
+          hasRegenerated: false,
         });
       },
       
       hasUnsavedChanges: () => {
-        const { currentTone, originalTone } = get();
-        if (!originalTone) return false;
-        
-        return (
-          currentTone.formality !== originalTone.formality ||
-          currentTone.brevity !== originalTone.brevity ||
-          currentTone.humor !== originalTone.humor ||
-          currentTone.warmth !== originalTone.warmth ||
-          currentTone.directness !== originalTone.directness ||
-          currentTone.expressiveness !== originalTone.expressiveness ||
-          currentTone.title !== originalTone.name ||
-          currentTone.summary !== originalTone.summary ||
-          currentTone.prompt !== originalTone.prompt ||
-          JSON.stringify(currentTone.examples) !== JSON.stringify(originalTone.examples)
-        );
+        const { hasRegenerated } = get();
+        return hasRegenerated;
       },
       
       resetCurrentTone: () => {
@@ -333,6 +327,7 @@ export const useToneStore = create<ToneState>()(
           error: null,
           isQuotaExceeded: false,
           originalTone: null,
+          hasRegenerated: false,
         });
       },
     }),
