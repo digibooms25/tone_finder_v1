@@ -11,6 +11,7 @@ import CopyPromptButton from '../components/CopyPromptButton';
 import Button from '../components/Button';
 import AuthForm from '../components/AuthForm';
 import AnalyzingLoader from '../components/AnalyzingLoader';
+import { ArrowLeft } from 'lucide-react';
 
 const Results: React.FC = () => {
   const navigate = useNavigate();
@@ -115,6 +116,10 @@ const Results: React.FC = () => {
     resetQuiz();
     navigate('/quiz');
   };
+
+  const handleBack = () => {
+    navigate('/dashboard');
+  };
   
   if (isGenerating) {
     return <AnalyzingLoader />;
@@ -123,6 +128,18 @@ const Results: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
+        {toneId && (
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="mb-8 flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+            onClick={handleBack}
+          >
+            <ArrowLeft className="mr-2" size={20} />
+            Back to Dashboard
+          </motion.button>
+        )}
+        
         <header className="text-center mb-12">
           <motion.h1
             className="text-3xl font-bold text-gray-900 mb-4"
@@ -166,8 +183,6 @@ const Results: React.FC = () => {
               showSave={!toneId && currentTone.summary !== ''}
               defaultName={currentTone.title}
               isEditing={!!toneId}
-              hasUnsavedChanges={hasUnsavedChanges()}
-              isRegenerating={isGenerating}
             />
             <TonePreview examples={currentTone.examples} />
             <CopyPromptButton prompt={currentTone.prompt} />
