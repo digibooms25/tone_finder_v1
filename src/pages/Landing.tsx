@@ -2,12 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
+import { useQuizStore } from '../store/useQuizStore';
 import { MessageSquare, Sliders, CopyCheck } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const { resetQuiz } = useQuizStore();
   
   const handleStartTest = () => {
+    resetQuiz(); // Reset quiz state before starting
     navigate('/quiz');
   };
   
