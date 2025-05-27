@@ -31,21 +31,18 @@ const Results: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [pendingSave, setPendingSave] = useState<string | null>(null);
   
-  // Show loader immediately if coming from quiz
   useEffect(() => {
     if (location.state?.fromQuiz) {
       setIsGenerating(true);
     }
   }, []);
   
-  // Set initial tone traits from quiz results when creating new tone
   useEffect(() => {
     if (!toneId) {
       setCurrentToneTraits(quizTraits);
     }
   }, [quizTraits, toneId]);
   
-  // Generate initial results only if coming from quiz
   useEffect(() => {
     const generateInitialResults = async () => {
       if (!toneId && !currentTone.summary && location.state?.fromQuiz) {
@@ -64,7 +61,6 @@ const Results: React.FC = () => {
     }
   }, [toneId, isGenerating]);
 
-  // Handle saving after successful authentication
   useEffect(() => {
     const handlePendingSave = async () => {
       if (pendingSave && user) {
@@ -73,9 +69,8 @@ const Results: React.FC = () => {
           navigate('/dashboard');
         } catch (error) {
           console.error('Error saving tone:', error);
-        } finally {
-          setPendingSave(null);
         }
+        setPendingSave(null);
       }
     };
 
@@ -107,7 +102,6 @@ const Results: React.FC = () => {
   };
   
   const handleAuthSuccess = () => {
-    setShowAuthForm(false);
     // The pending save will be handled by the useEffect above
   };
   
@@ -146,7 +140,6 @@ const Results: React.FC = () => {
         </header>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left Column */}
           <div className="space-y-8">
             <ToneSummary 
               title={currentTone.title} 
@@ -161,7 +154,6 @@ const Results: React.FC = () => {
             <CopyPromptButton prompt={currentTone.prompt} />
           </div>
           
-          {/* Right Column */}
           <div>
             <ToneAdjuster
               traits={{

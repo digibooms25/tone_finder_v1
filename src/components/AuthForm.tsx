@@ -26,9 +26,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onSuccess, setShowAuthModal }
       if (onSuccess) {
         onSuccess();
       }
-      if (setShowAuthModal) {
-        setShowAuthModal(false);
-      }
     } catch (err) {
       console.error('Authentication error:', err);
     }
