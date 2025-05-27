@@ -24,7 +24,6 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
   isLoading,
 }) => {
   const [localTraits, setLocalTraits] = useState(traits);
-  const [hasChanges, setHasChanges] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   
   useEffect(() => {
@@ -38,7 +37,6 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
     };
     
     setLocalTraits(updatedTraits);
-    setHasChanges(true);
     onTraitsChange(updatedTraits);
   };
   
@@ -46,7 +44,6 @@ const ToneAdjuster: React.FC<ToneAdjusterProps> = ({
     setIsRegenerating(true);
     try {
       await onRegenerate();
-      setHasChanges(false);
     } finally {
       setIsRegenerating(false);
     }

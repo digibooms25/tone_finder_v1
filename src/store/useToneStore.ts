@@ -21,6 +21,7 @@ type ToneState = {
   loading: boolean;
   error: string | null;
   isQuotaExceeded: boolean;
+  originalTone: ToneProfile | null;
   
   generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
@@ -32,6 +33,7 @@ type ToneState = {
   updateTone: (toneId: string, updates: Partial<ToneProfile>) => Promise<void>;
   resetCurrentTone: () => void;
   clearError: () => void;
+  hasUnsavedChanges: () => boolean;
 };
 
 const initialTraits = {
@@ -59,6 +61,7 @@ export const useToneStore = create<ToneState>()(
       loading: false,
       error: null,
       isQuotaExceeded: false,
+      originalTone: null,
       
       generateContent: async () => {
         try {
@@ -73,7 +76,6 @@ export const useToneStore = create<ToneState>()(
             expressiveness: currentTone.expressiveness,
           };
           
-          // Generate summary and examples in parallel
           const [summaryResult, examplesResult] = await Promise.all([
             generateToneSummary(traits),
             generateToneExamples(traits),
@@ -92,16 +94,6 @@ export const useToneStore = create<ToneState>()(
               examples: examplesResult,
             },
           }));
-
-          // If we're editing an existing tone, update it in the database
-          if (currentTone.id) {
-            await get().updateTone(currentTone.id, {
-              name: summaryResult.title,
-              summary: summaryResult.summary,
-              prompt: summaryResult.prompt,
-              examples: examplesResult,
-            });
-          }
         } catch (error) {
           if (error instanceof OpenAIQuotaError) {
             set({ 
@@ -150,6 +142,7 @@ export const useToneStore = create<ToneState>()(
           if (data) {
             set((state) => ({
               savedTones: [...state.savedTones, data[0] as ToneProfile],
+              originalTone: data[0] as ToneProfile,
             }));
           }
         } catch (error) {
@@ -258,6 +251,9 @@ export const useToneStore = create<ToneState>()(
             savedTones: state.savedTones.map((tone) =>
               tone.id === toneId ? { ...tone, ...updates } : tone
             ),
+            originalTone: state.originalTone?.id === toneId ? 
+              { ...state.originalTone, ...updates } : 
+              state.originalTone,
           }));
         } catch (error) {
           set({ error: (error as Error).message });
@@ -291,7 +287,26 @@ export const useToneStore = create<ToneState>()(
             prompt: tone.prompt,
             examples: tone.examples || [],
           },
+          originalTone: tone,
         });
+      },
+      
+      hasUnsavedChanges: () => {
+        const { currentTone, originalTone } = get();
+        if (!originalTone) return false;
+        
+        return (
+          currentTone.formality !== originalTone.formality ||
+          currentTone.brevity !== originalTone.brevity ||
+          currentTone.humor !== originalTone.humor ||
+          currentTone.warmth !== originalTone.warmth ||
+          currentTone.directness !== originalTone.directness ||
+          currentTone.expressiveness !== originalTone.expressiveness ||
+          currentTone.title !== originalTone.name ||
+          currentTone.summary !== originalTone.summary ||
+          currentTone.prompt !== originalTone.prompt ||
+          JSON.stringify(currentTone.examples) !== JSON.stringify(originalTone.examples)
+        );
       },
       
       resetCurrentTone: () => {
@@ -299,6 +314,7 @@ export const useToneStore = create<ToneState>()(
           currentTone: { ...initialToneState },
           error: null,
           isQuotaExceeded: false,
+          originalTone: null,
         });
       },
     }),
