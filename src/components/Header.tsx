@@ -4,16 +4,24 @@ import { useAuthStore } from '../store/useAuthStore';
 import Button from './Button';
 import { LogIn, LogOut, User, ChevronDown, Home, PlusCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AuthForm from './AuthForm';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuthStore();
   const [showMenu, setShowMenu] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
     setShowMenu(false);
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    navigate('/dashboard');
   };
   
   return (
@@ -97,13 +105,67 @@ const Header: React.FC = () => {
               variant="outline"
               size="sm"
               icon={<LogIn size={16} />}
-              onClick={() => navigate('/login')}
+              onClick={() => {
+                setAuthMode('signin');
+                setShowAuthModal(true);
+              }}
             >
               Sign In
             </Button>
           )}
         </div>
       </div>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+                </h2>
+                <button
+                  onClick={() => setShowAuthModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <AuthForm mode={authMode} onSuccess={handleAuthSuccess} />
+              
+              <div className="mt-4 text-center text-sm">
+                {authMode === 'signin' ? (
+                  <p>
+                    Don't have an account?{' '}
+                    <button
+                      onClick={() => setAuthMode('signup')}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Sign Up
+                    </button>
+                  </p>
+                ) : (
+                  <p>
+                    Already have an account?{' '}
+                    <button
+                      onClick={() => setAuthMode('signin')}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Sign In
+                    </button>
+                  </p>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </header>
   );
 };
