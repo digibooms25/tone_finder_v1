@@ -1,112 +1,121 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Brain } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const AnalyzingLoader: React.FC = () => {
-  const pulseVariants = {
-    initial: { scale: 1, opacity: 0.5 },
-    animate: {
-      scale: [1, 1.2, 1],
-      opacity: [0.5, 0.8, 0.5],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
+  const [progress, setProgress] = useState(0);
+  const [currentPhase, setCurrentPhase] = useState(0);
+  
+  const phases = [
+    {
+      title: "Pattern Analysis",
+      description: "Analyzing your communication patterns and preferences...",
+      duration: 1500
+    },
+    {
+      title: "Style Detection",
+      description: "Identifying your unique writing style markers...",
+      duration: 1500
+    },
+    {
+      title: "Trait Mapping",
+      description: "Mapping your responses to tone characteristics...",
+      duration: 1500
+    },
+    {
+      title: "Profile Generation",
+      description: "Creating your personalized tone profile...",
+      duration: 1500
     }
-  };
-
-  const brainVariants = {
-    initial: { rotate: 0 },
-    animate: {
-      rotate: [0, 5, -5, 0],
-      transition: {
-        duration: 4,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  };
-
-  const textVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { 
-      opacity: [0, 1, 0.5],
-      y: 0,
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  };
-
-  const messages = [
-    "Analyzing writing patterns...",
-    "Detecting tone preferences...",
-    "Processing communication style...",
-    "Identifying unique traits...",
-    "Generating personalized insights..."
   ];
 
+  useEffect(() => {
+    const totalDuration = phases.reduce((acc, phase) => acc + phase.duration, 0);
+    const increment = 100 / totalDuration;
+    
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        const next = prev + increment;
+        return next > 100 ? 100 : next;
+      });
+    }, 50);
+
+    phases.forEach((phase, index) => {
+      setTimeout(() => {
+        setCurrentPhase(index);
+      }, phases.slice(0, index).reduce((acc, p) => acc + p.duration, 0));
+    });
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
-      <div className="text-center">
+    <div className="fixed inset-0 bg-white bg-opacity-95 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="max-w-md w-full mx-4">
         <motion.div
-          initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-8 rounded-2xl shadow-lg"
         >
-          <div className="relative">
+          {/* Progress Bar */}
+          <div className="relative h-2 bg-gray-100 rounded-full mb-8 overflow-hidden">
             <motion.div
-              variants={pulseVariants}
-              initial="initial"
-              animate="animate"
-              className="absolute inset-0 bg-blue-200 rounded-full blur-xl"
+              className="absolute left-0 top-0 h-full bg-blue-600 rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5 }}
             />
-            <motion.div 
-              variants={brainVariants}
-              initial="initial"
-              animate="animate"
-              className="relative bg-blue-600 text-white p-6 rounded-full transform-gpu"
+          </div>
+
+          {/* Phase Title */}
+          <AnimatePresence mode="wait">
+            <motion.h2
+              key={`title-${currentPhase}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-2xl font-bold text-gray-900 mb-3 text-center"
             >
-              <Brain size={48} />
-            </motion.div>
+              {phases[currentPhase].title}
+            </motion.h2>
+          </AnimatePresence>
+
+          {/* Phase Description */}
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={`desc-${currentPhase}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="text-gray-600 text-center mb-6"
+            >
+              {phases[currentPhase].description}
+            </motion.p>
+          </AnimatePresence>
+
+          {/* Progress Percentage */}
+          <div className="text-center text-sm font-medium text-gray-500">
+            {Math.round(progress)}% Complete
+          </div>
+
+          {/* Visual Progress Indicators */}
+          <div className="flex justify-center gap-2 mt-6">
+            {phases.map((_, index) => (
+              <motion.div
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  index <= currentPhase ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
+                animate={{
+                  scale: index === currentPhase ? [1, 1.2, 1] : 1,
+                }}
+                transition={{
+                  duration: 1,
+                  repeat: index === currentPhase ? Infinity : 0,
+                }}
+              />
+            ))}
           </div>
         </motion.div>
-        
-        <motion.h2
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-2xl font-bold text-gray-900 mb-3"
-        >
-          Analyzing Your Responses
-        </motion.h2>
-        
-        <div className="h-6 overflow-hidden">
-          {messages.map((message, index) => (
-            <motion.p
-              key={index}
-              custom={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ 
-                opacity: [0, 1, 0],
-                y: [-20, 0, 20]
-              }}
-              transition={{
-                duration: 3,
-                delay: index * 3,
-                repeat: Infinity,
-                repeatDelay: messages.length * 3 - 3
-              }}
-              className="text-gray-600"
-            >
-              {message}
-            </motion.p>
-          ))}
-        </div>
       </div>
     </div>
   );
