@@ -11,7 +11,7 @@ import CopyPromptButton from '../components/CopyPromptButton';
 import Button from '../components/Button';
 import AuthForm from '../components/AuthForm';
 import AnalyzingLoader from '../components/AnalyzingLoader';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles, Wand2 } from 'lucide-react';
 
 const Results: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +27,6 @@ const Results: React.FC = () => {
     saveTone,
     setCurrentToneTraits,
     clearError,
-    hasUnsavedChanges,
     setPendingSave,
   } = useToneStore();
   const { user } = useAuthStore();
@@ -116,7 +115,7 @@ const Results: React.FC = () => {
     resetQuiz();
     navigate('/quiz');
   };
-
+  
   const handleBack = () => {
     navigate('/dashboard');
   };
@@ -126,8 +125,14 @@ const Results: React.FC = () => {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transform rotate-12" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl transform -rotate-12" />
+      </div>
+
+      <div className="container mx-auto px-4 max-w-6xl relative">
         {toneId && (
           <motion.button
             initial={{ opacity: 0, x: -20 }}
@@ -141,36 +146,65 @@ const Results: React.FC = () => {
         )}
         
         <header className="text-center mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-sm mb-4"
+          >
+            <Wand2 className="text-purple-500 mr-2" size={18} />
+            <span className="text-gray-600">
+              {toneId ? 'Fine-tune Your Tone' : 'Your Results Are Ready'}
+            </span>
+          </motion.div>
+
           <motion.h1
-            className="text-3xl font-bold text-gray-900 mb-4"
+            className="text-4xl font-bold text-gray-900 mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {toneId ? 'Edit Your Tone' : 'Your Writing Tone Results'}
+            {toneId ? (
+              'Edit Your Tone'
+            ) : (
+              <span>
+                Your Writing Voice
+                <motion.span
+                  className="inline-block ml-2"
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  ✨
+                </motion.span>
+              </span>
+            )}
           </motion.h1>
+          
           <motion.p 
-            className="text-lg text-gray-600 max-w-2xl mx-auto"
+            className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             {toneId 
-              ? 'Adjust the sliders to fine-tune your tone and see how it changes.'
-              : 'Here\'s what we\'ve discovered about your writing style. Adjust the sliders to fine-tune your tone.'
-            }
+              ? 'Adjust the sliders to fine-tune your tone and see how it changes your writing style.'
+              : 'Here\'s what we\'ve discovered about your unique communication style. Use the controls to perfect your tone.'}
           </motion.p>
         </header>
         
         {error && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-white/80 backdrop-blur-sm border border-red-100 rounded-xl shadow-lg"
+          >
             <p className="text-red-700">{error}</p>
             {isQuotaExceeded && (
               <p className="mt-2 text-red-600">
                 The AI service is currently unavailable due to high demand. Please try again in a few minutes.
               </p>
             )}
-          </div>
+          </motion.div>
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -205,22 +239,31 @@ const Results: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex justify-center mt-12">
-          <Button variant="outline" onClick={handleStartOver}>
+        <motion.div 
+          className="flex justify-center mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Button 
+            variant="outline" 
+            onClick={handleStartOver}
+            className="bg-white/80 backdrop-blur-sm hover:bg-white/90"
+          >
             Take the Test Again
           </Button>
-        </div>
+        </motion.div>
         
         {showAuthForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+              <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full mx-4">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900">
                     {authMode === 'signin' ? 'Sign In' : 'Create Account'}
                   </h2>
                   <button
