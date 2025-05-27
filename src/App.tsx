@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import Header from './components/Header';
 import Landing from './pages/Landing';
@@ -8,7 +8,7 @@ import Results from './pages/Results';
 import Dashboard from './pages/Dashboard';
 
 function App() {
-  const { checkSession, user, loading } = useAuthStore();
+  const { checkSession, loading } = useAuthStore();
   
   useEffect(() => {
     checkSession();
@@ -32,10 +32,7 @@ function App() {
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/results" element={<Results />} />
             <Route path="/edit/:toneId" element={<Results />} />
-            <Route 
-              path="/dashboard" 
-              element={user ? <Dashboard /> : <Navigate to="/" />} 
-            />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </main>
       </div>

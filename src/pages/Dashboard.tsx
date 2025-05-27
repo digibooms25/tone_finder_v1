@@ -5,7 +5,7 @@ import { useToneStore } from '../store/useToneStore';
 import { useAuthStore } from '../store/useAuthStore';
 import ToneCard from '../components/ToneCard';
 import Button from '../components/Button';
-import { PlusCircle, LogOut } from 'lucide-react';
+import { PlusCircle, LogOut, Sparkles } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -22,12 +22,9 @@ const Dashboard: React.FC = () => {
   const [message, setMessage] = useState('');
   
   useEffect(() => {
-    if (!user) {
-      navigate('/');
-      return;
+    if (user) {
+      loadSavedTones(user.id);
     }
-    
-    loadSavedTones(user.id);
   }, [user]);
   
   const handleDelete = async (id: string) => {
@@ -66,16 +63,49 @@ const Dashboard: React.FC = () => {
     await signOut();
     navigate('/');
   };
+
+  const renderEmptyState = () => (
+    <div className="text-center py-16 bg-white rounded-lg shadow-md">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="max-w-md mx-auto px-6"
+      >
+        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Sparkles size={24} className="text-blue-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          Discover Your Writing Voice
+        </h2>
+        <p className="text-gray-600 mb-8">
+          Take our quick tone test to understand your unique writing style. Get personalized insights and a custom prompt you can use with any AI writing assistant.
+        </p>
+        <Button
+          onClick={handleNewTone}
+          size="lg"
+          className="w-full sm:w-auto"
+          icon={<PlusCircle size={20} />}
+        >
+          Start Tone Test
+        </Button>
+      </motion.div>
+    </div>
+  );
   
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex justify-between items-center mb-12">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Saved Tones</h1>
-            <p className="text-gray-600">
-              {user?.email && `Signed in as ${user.email}`}
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {user ? 'Your Saved Tones' : 'Writing Tone Dashboard'}
+            </h1>
+            {user && (
+              <p className="text-gray-600">
+                Signed in as {user.email}
+              </p>
+            )}
           </div>
           
           <div className="flex gap-4">
@@ -86,13 +116,15 @@ const Dashboard: React.FC = () => {
             >
               New Tone
             </Button>
-            <Button
-              variant="outline"
-              icon={<LogOut size={18} />}
-              onClick={handleSignOut}
-            >
-              Sign Out
-            </Button>
+            {user && (
+              <Button
+                variant="outline"
+                icon={<LogOut size={18} />}
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </Button>
+            )}
           </div>
         </div>
         
@@ -111,7 +143,7 @@ const Dashboard: React.FC = () => {
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        ) : savedTones.length > 0 ? (
+        ) : user && savedTones.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {savedTones.map((tone) => (
               <motion.div
@@ -132,14 +164,7 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow-md">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <PlusCircle size={24} className="text-blue-600" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">No tones saved yet</h2>
-            <p className="text-gray-600 mb-6">Take the tone test to discover and save your unique writing style.</p>
-            <Button onClick={handleNewTone}>Start Tone Test</Button>
-          </div>
+          renderEmptyState()
         )}
       </div>
     </div>
