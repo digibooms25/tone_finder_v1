@@ -45,12 +45,17 @@ const Results: React.FC = () => {
     }
   }, [quizTraits, toneId]);
   
-  // Generate initial results only for new tones
+  // Generate initial results and auto-save for new tones
   useEffect(() => {
-    const generateInitialResults = async () => {
+    const generateAndSave = async () => {
       if (!toneId && !currentTone.summary) {
         try {
           await generateContent();
+          // Auto-save if user is authenticated
+          if (user) {
+            await saveTone(currentTone.title || 'My Tone', user.id);
+            navigate('/dashboard');
+          }
         } finally {
           setIsGenerating(false);
         }
@@ -58,9 +63,9 @@ const Results: React.FC = () => {
     };
     
     if (isGenerating) {
-      generateInitialResults();
+      generateAndSave();
     }
-  }, [toneId, isGenerating]);
+  }, [toneId, isGenerating, user]);
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
@@ -87,6 +92,11 @@ const Results: React.FC = () => {
   
   const handleAuthSuccess = async () => {
     setShowAuthForm(false);
+    // Auto-save after successful authentication
+    if (currentTone.summary) {
+      await saveTone(currentTone.title || 'My Tone', user!.id);
+      navigate('/dashboard');
+    }
   };
   
   const handleStartOver = () => {
@@ -151,9 +161,7 @@ const Results: React.FC = () => {
               isLoading={loading || isGenerating}
             />
             
-            {user ? (
-              <SaveToneForm onSave={handleSaveTone} isLoading={loading} />
-            ) : (
+            {!user && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4 text-gray-800">Save Your Tone</h3>
                 <p className="text-gray-600 mb-6">
