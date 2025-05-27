@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuizStore } from '../store/useQuizStore';
 import { useToneStore } from '../store/useToneStore';
@@ -14,6 +14,7 @@ import AuthForm from '../components/AuthForm';
 
 const Results: React.FC = () => {
   const navigate = useNavigate();
+  const { toneId } = useParams();
   const { traits: quizTraits, resetQuiz } = useQuizStore();
   const { 
     currentTone,
@@ -29,19 +30,23 @@ const Results: React.FC = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGenerating, setIsGenerating] = useState(false);
   
+  // Set initial tone traits from quiz results when creating new tone
   useEffect(() => {
-    setCurrentToneTraits(quizTraits);
-  }, [quizTraits]);
+    if (!toneId) {
+      setCurrentToneTraits(quizTraits);
+    }
+  }, [quizTraits, toneId]);
   
+  // Generate initial results only for new tones
   useEffect(() => {
     const generateInitialResults = async () => {
-      if (!currentTone.summary) {
+      if (!toneId && !currentTone.summary) {
         await handleRegenerate();
       }
     };
     
     generateInitialResults();
-  }, []);
+  }, [toneId]);
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
@@ -90,7 +95,7 @@ const Results: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Your Writing Tone Results
+            {toneId ? 'Edit Your Tone' : 'Your Writing Tone Results'}
           </motion.h1>
           <motion.p 
             className="text-lg text-gray-600 max-w-2xl mx-auto"
@@ -98,7 +103,10 @@ const Results: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Here's what we've discovered about your writing style. Adjust the sliders to fine-tune your tone.
+            {toneId 
+              ? 'Adjust the sliders to fine-tune your tone and see how it changes.'
+              : 'Here\'s what we\'ve discovered about your writing style. Adjust the sliders to fine-tune your tone.'
+            }
           </motion.p>
         </header>
         
