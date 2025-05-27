@@ -69,14 +69,14 @@ const ChatGPTGuide: React.FC = () => {
                   For a persistent tone across all conversations, add your tone to ChatGPT's custom instructions:
                 </p>
                 <ol className="list-decimal list-inside space-y-4 text-gray-700">
-                  <li>Click your profile picture in ChatGPT</li>
-                  <li>Select "Custom Instructions"</li>
-                  <li>In "How would you like ChatGPT to respond?", paste your tone prompt</li>
+                  <li>Click your profile picture</li>
+                  <li>Select "Customize ChatGPT"</li>
+                  <li>Under "What traits should ChatGPT have?", paste your tone prompt</li>
                   <li>Click "Save"</li>
                 </ol>
                 <div className="bg-blue-50 p-6 rounded-xl">
                   <p className="text-blue-800">
-                    💡 Pro Tip: This method ensures ChatGPT maintains your tone across all conversations without needing to paste the prompt each time.
+                    💡 Pro Tip: You can also add traits like "Chatty", "Witty", "Straight shooting", "Encouraging", or "Gen Z" to further customize the tone.
                   </p>
                 </div>
               </div>
