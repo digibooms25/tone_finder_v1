@@ -21,8 +21,7 @@ type ToneState = {
   loading: boolean;
   error: string | null;
   
-  generateSummary: () => Promise<void>;
-  generateExamples: () => Promise<void>;
+  generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
   loadSavedTones: (userId: string) => Promise<void>;
   deleteTone: (toneId: string) => Promise<void>;
@@ -57,7 +56,7 @@ export const useToneStore = create<ToneState>()(
       loading: false,
       error: null,
       
-      generateSummary: async () => {
+      generateContent: async () => {
         try {
           set({ loading: true, error: null });
           const { currentTone } = get();
@@ -70,51 +69,34 @@ export const useToneStore = create<ToneState>()(
             expressiveness: currentTone.expressiveness,
           };
           
-          const { title, summary, prompt } = await generateToneSummary(traits);
+          // Generate summary and examples in parallel
+          const [summaryResult, examplesResult] = await Promise.all([
+            generateToneSummary(traits),
+            generateToneExamples(traits),
+          ]);
           
           set((state) => ({
             currentTone: {
               ...state.currentTone,
-              title,
-              summary,
-              prompt,
-            },
-          }));
-        } catch (error) {
-          set({ error: (error as Error).message });
-        } finally {
-          set({ loading: false });
-        }
-      },
-      
-      generateExamples: async () => {
-        try {
-          set({ loading: true, error: null });
-          const { currentTone } = get();
-          const traits = {
-            formality: currentTone.formality,
-            brevity: currentTone.brevity,
-            humor: currentTone.humor,
-            warmth: currentTone.warmth,
-            directness: currentTone.directness,
-            expressiveness: currentTone.expressiveness,
-          };
-          
-          const examples = await generateToneExamples(traits);
-          
-          set((state) => ({
-            currentTone: {
-              ...state.currentTone,
-              examples,
+              title: summaryResult.title,
+              summary: summaryResult.summary,
+              prompt: summaryResult.prompt,
+              examples: examplesResult,
             },
           }));
 
           // If we're editing an existing tone, update it in the database
           if (currentTone.id) {
-            await get().updateTone(currentTone.id, { examples });
+            await get().updateTone(currentTone.id, {
+              name: summaryResult.title,
+              summary: summaryResult.summary,
+              prompt: summaryResult.prompt,
+              examples: examplesResult,
+            });
           }
         } catch (error) {
           set({ error: (error as Error).message });
+          throw error;
         } finally {
           set({ loading: false });
         }
@@ -130,7 +112,7 @@ export const useToneStore = create<ToneState>()(
             .insert([
               {
                 user_id: userId,
-                name,
+                name: name || currentTone.title,
                 formality: currentTone.formality,
                 brevity: currentTone.brevity,
                 humor: currentTone.humor,
@@ -153,6 +135,7 @@ export const useToneStore = create<ToneState>()(
           }
         } catch (error) {
           set({ error: (error as Error).message });
+          throw error;
         } finally {
           set({ loading: false });
         }
@@ -218,6 +201,7 @@ export const useToneStore = create<ToneState>()(
           }));
         } catch (error) {
           set({ error: (error as Error).message });
+          throw error;
         } finally {
           set({ loading: false });
         }
@@ -249,7 +233,7 @@ export const useToneStore = create<ToneState>()(
           },
         });
       },
-
+      
       resetCurrentTone: () => {
         set({
           currentTone: { ...initialToneState },
