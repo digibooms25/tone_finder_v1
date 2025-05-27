@@ -105,6 +105,11 @@ export const useToneStore = create<ToneState>()(
               examples,
             },
           }));
+
+          // If we're editing an existing tone, update it in the database
+          if (currentTone.id) {
+            await get().updateTone(currentTone.id, { examples });
+          }
         } catch (error) {
           set({ error: (error as Error).message });
         } finally {
@@ -131,6 +136,7 @@ export const useToneStore = create<ToneState>()(
                 expressiveness: currentTone.expressiveness,
                 summary: currentTone.summary,
                 prompt: currentTone.prompt,
+                examples: currentTone.examples,
               },
             ])
             .select();
@@ -142,29 +148,6 @@ export const useToneStore = create<ToneState>()(
               savedTones: [...state.savedTones, data[0] as ToneProfile],
             }));
           }
-        } catch (error) {
-          set({ error: (error as Error).message });
-        } finally {
-          set({ loading: false });
-        }
-      },
-      
-      updateTone: async (toneId: string, updates: Partial<ToneProfile>) => {
-        try {
-          set({ loading: true, error: null });
-          
-          const { error } = await supabase
-            .from('tone_profiles')
-            .update(updates)
-            .eq('id', toneId);
-          
-          if (error) throw error;
-          
-          set((state) => ({
-            savedTones: state.savedTones.map((tone) =>
-              tone.id === toneId ? { ...tone, ...updates } : tone
-            ),
-          }));
         } catch (error) {
           set({ error: (error as Error).message });
         } finally {
@@ -214,6 +197,29 @@ export const useToneStore = create<ToneState>()(
         }
       },
       
+      updateTone: async (toneId: string, updates: Partial<ToneProfile>) => {
+        try {
+          set({ loading: true, error: null });
+          
+          const { error } = await supabase
+            .from('tone_profiles')
+            .update(updates)
+            .eq('id', toneId);
+          
+          if (error) throw error;
+          
+          set((state) => ({
+            savedTones: state.savedTones.map((tone) =>
+              tone.id === toneId ? { ...tone, ...updates } : tone
+            ),
+          }));
+        } catch (error) {
+          set({ error: (error as Error).message });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      
       setCurrentToneTraits: (traits) => {
         set((state) => ({
           currentTone: {
@@ -236,7 +242,7 @@ export const useToneStore = create<ToneState>()(
             title: tone.name,
             summary: tone.summary,
             prompt: tone.prompt,
-            examples: [],
+            examples: tone.examples || [],
           },
         });
       },
