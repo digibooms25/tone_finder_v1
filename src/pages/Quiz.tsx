@@ -9,7 +9,7 @@ import MultiSelectQuestion from '../components/QuestionTypes/MultiSelectQuestion
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
 import { useToneStore } from '../store/useToneStore';
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Brain } from 'lucide-react';
 import AnalyzingLoader from '../components/AnalyzingLoader';
 
 const Quiz: React.FC = () => {
@@ -28,7 +28,6 @@ const Quiz: React.FC = () => {
   const { resetCurrentTone } = useToneStore();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
-  // Reset current tone and set question index to 0 when starting a new quiz
   useEffect(() => {
     resetCurrentTone();
     setCurrentQuestionIndex(0);
@@ -111,8 +110,24 @@ const Quiz: React.FC = () => {
   const canContinue = !!currentAnswer;
   
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-3xl">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transform rotate-12" />
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl transform -rotate-12" />
+      </div>
+
+      <div className="container mx-auto px-4 max-w-3xl relative">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full shadow-sm mb-8"
+        >
+          <Brain className="text-blue-600 mr-2" size={18} />
+          <span className="text-gray-600">Question {currentQuestionIndex + 1} of {questions.length}</span>
+        </motion.div>
+
         <div className="mb-8">
           <ProgressBar
             currentStep={currentQuestionIndex}
@@ -138,6 +153,7 @@ const Quiz: React.FC = () => {
             disabled={currentQuestionIndex === 0}
             variant="outline"
             icon={<ChevronLeft size={18} />}
+            className="bg-white/80 backdrop-blur-sm hover:bg-white"
           >
             Previous
           </Button>
@@ -147,6 +163,7 @@ const Quiz: React.FC = () => {
             disabled={!canContinue}
             icon={isLastQuestion ? <CheckCircle size={18} /> : <ChevronRight size={18} />}
             iconPosition={isLastQuestion ? 'left' : 'right'}
+            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
           >
             {isLastQuestion ? 'Complete Test' : 'Next'}
           </Button>
