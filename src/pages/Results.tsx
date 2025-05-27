@@ -27,13 +27,14 @@ const Results: React.FC = () => {
     setCurrentToneTraits,
     clearError,
     hasUnsavedChanges,
+    setPendingSave,
   } = useToneStore();
   const { user } = useAuthStore();
   
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [pendingSave, setPendingSave] = useState<string | null>(null);
+  const [pendingName, setPendingName] = useState<string | null>(null);
   
   useEffect(() => {
     if (location.state?.fromQuiz) {
@@ -69,19 +70,20 @@ const Results: React.FC = () => {
 
   useEffect(() => {
     const savePendingTone = async () => {
-      if (pendingSave && user) {
+      if (pendingName && user) {
         try {
-          await saveTone(pendingSave, user.id);
+          await saveTone(pendingName, user.id);
           navigate('/dashboard');
         } catch (error) {
           console.error('Error saving tone:', error);
         }
-        setPendingSave(null);
+        setPendingName(null);
+        setPendingSave(false);
       }
     };
 
     savePendingTone();
-  }, [user, pendingSave]);
+  }, [user, pendingName]);
   
   const handleTraitsChange = (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
@@ -102,7 +104,8 @@ const Results: React.FC = () => {
       await saveTone(name, user.id);
       navigate('/dashboard');
     } else {
-      setPendingSave(name);
+      setPendingName(name);
+      setPendingSave(true);
       setShowAuthForm(true);
       setAuthMode('signup');
     }
@@ -206,7 +209,11 @@ const Results: React.FC = () => {
                     {authMode === 'signin' ? 'Sign In' : 'Create Account'}
                   </h2>
                   <button
-                    onClick={() => setShowAuthForm(false)}
+                    onClick={() => {
+                      setShowAuthForm(false);
+                      setPendingSave(false);
+                      setPendingName(null);
+                    }}
                     className="text-gray-500 hover:text-gray-700"
                   >
                     ✕

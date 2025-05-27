@@ -23,6 +23,7 @@ type ToneState = {
   isQuotaExceeded: boolean;
   originalTone: ToneProfile | null;
   hasRegenerated: boolean;
+  pendingSave: boolean;
   
   generateContent: () => Promise<void>;
   saveTone: (name: string, userId: string) => Promise<void>;
@@ -35,6 +36,7 @@ type ToneState = {
   resetCurrentTone: () => void;
   clearError: () => void;
   hasUnsavedChanges: () => boolean;
+  setPendingSave: (pending: boolean) => void;
 };
 
 const initialTraits = {
@@ -64,6 +66,11 @@ export const useToneStore = create<ToneState>()(
       isQuotaExceeded: false,
       originalTone: null,
       hasRegenerated: false,
+      pendingSave: false,
+      
+      setPendingSave: (pending: boolean) => {
+        set({ pendingSave: pending });
+      },
       
       generateContent: async () => {
         try {
@@ -151,6 +158,7 @@ export const useToneStore = create<ToneState>()(
                 ),
                 originalTone: data,
                 hasRegenerated: false,
+                pendingSave: false,
               }));
             }
           } else {
@@ -167,6 +175,7 @@ export const useToneStore = create<ToneState>()(
                 savedTones: [...state.savedTones, data],
                 originalTone: data,
                 hasRegenerated: false,
+                pendingSave: false,
               }));
             }
           }
@@ -319,16 +328,24 @@ export const useToneStore = create<ToneState>()(
           },
           originalTone: tone,
           hasRegenerated: false,
+          pendingSave: false,
         });
       },
       
       hasUnsavedChanges: () => {
-        const { currentTone, originalTone, hasRegenerated } = get();
+        const { currentTone, originalTone, hasRegenerated, pendingSave } = get();
         
+        // If there's a pending save, always return true
+        if (pendingSave) {
+          return true;
+        }
+        
+        // For new tones, only require regeneration
         if (!originalTone) {
           return hasRegenerated;
         }
         
+        // For existing tones, check for actual changes
         return hasRegenerated && (
           currentTone.formality !== originalTone.formality ||
           currentTone.brevity !== originalTone.brevity ||
@@ -350,6 +367,7 @@ export const useToneStore = create<ToneState>()(
           isQuotaExceeded: false,
           originalTone: null,
           hasRegenerated: false,
+          pendingSave: false,
         });
       },
     }),
