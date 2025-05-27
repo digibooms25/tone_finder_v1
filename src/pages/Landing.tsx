@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
-import { Brain, Sliders, Wand2, ArrowRight, Sparkles, MessageSquare, Bot, Cpu, MessageCircle } from 'lucide-react';
+import { Brain, Sliders, Wand2, ArrowRight, Sparkles, MessageSquare, Youtube } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const Landing: React.FC = () => {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-40 px-4">
+      <section className="relative pt-32 pb-20 px-4">
         <motion.div 
           className="max-w-4xl mx-auto text-center"
           initial={{ opacity: 0, y: 20 }}
@@ -68,13 +68,72 @@ const Landing: React.FC = () => {
               size="lg"
               onClick={handleStartTest}
               className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
+              icon={<ArrowRight className="ml-2" size={24} />}
               iconPosition="right"
             >
               Start Your Journey
             </Button>
           </motion.div>
         </motion.div>
+      </section>
+
+      {/* More Ways to Create Tones Section */}
+      <section className="py-16 px-4 relative">
+        <div className="max-w-6xl mx-auto">
+          <motion.h2 
+            className="text-3xl font-bold text-gray-900 mb-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            More Ways to Create Tones
+          </motion.h2>
+
+          <motion.div
+            className="grid md:grid-cols-2 gap-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <motion.div
+              className="relative group cursor-pointer"
+              onClick={() => navigate('/youtube')}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="h-full p-8 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-xl">
+                <div className="relative text-white">
+                  <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6">
+                    <Youtube size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">Extract Tone from YouTube Video</h3>
+                  <p className="leading-relaxed mb-6 opacity-90">
+                    Analyze your speaking style from any YouTube video with captions. Perfect for capturing your natural voice.
+                  </p>
+                  <div className="flex items-center font-medium">
+                    <span>Try Video Analysis</span>
+                    <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Placeholder for future methods */}
+            <div className="opacity-50 cursor-not-allowed">
+              <div className="h-full p-8 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-600 shadow-xl">
+                <div className="relative text-white">
+                  <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6">
+                    <MessageSquare size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">More Coming Soon</h3>
+                  <p className="leading-relaxed mb-6 opacity-90">
+                    We're working on additional ways to help you discover and create your perfect tone.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </section>
 
       {/* Features Section */}
