@@ -150,20 +150,28 @@ const ToneCard: React.FC<ToneCardProps> = ({
                 onKeyDown={handleKeyDown}
                 className="flex-1 px-2 py-1 text-lg font-semibold text-gray-800 border-b-2 border-blue-500 focus:outline-none bg-transparent"
               />
-              <button
-                onClick={handleRename}
-                className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors"
-                title="Save"
-              >
-                <Check size={16} />
-              </button>
-              <button
-                onClick={cancelRename}
-                className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
-                title="Cancel"
-              >
-                <X size={16} />
-              </button>
+              <div className="flex items-center">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRename();
+                  }}
+                  className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-full transition-colors z-10"
+                  title="Save"
+                >
+                  <Check size={16} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cancelRename();
+                  }}
+                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors z-10"
+                  title="Cancel"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col">
