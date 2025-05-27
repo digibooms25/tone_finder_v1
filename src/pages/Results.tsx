@@ -117,10 +117,6 @@ const Results: React.FC = () => {
     navigate('/quiz');
   };
   
-  const handleSkipToHome = () => {
-    navigate('/');
-  };
-  
   if (isGenerating) {
     return <AnalyzingLoader />;
   }
@@ -202,12 +198,9 @@ const Results: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-12">
+        <div className="flex justify-center mt-12">
           <Button variant="outline" onClick={handleStartOver}>
             Take the Test Again
-          </Button>
-          <Button variant="secondary" onClick={handleSkipToHome}>
-            Return to Home
           </Button>
         </div>
         
