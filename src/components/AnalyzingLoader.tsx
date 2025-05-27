@@ -3,6 +3,52 @@ import { motion } from 'framer-motion';
 import { Brain } from 'lucide-react';
 
 const AnalyzingLoader: React.FC = () => {
+  const pulseVariants = {
+    initial: { scale: 1, opacity: 0.5 },
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [0.5, 0.8, 0.5],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const brainVariants = {
+    initial: { rotate: 0 },
+    animate: {
+      rotate: [0, 5, -5, 0],
+      transition: {
+        duration: 4,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const textVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: [0, 1, 0.5],
+      y: 0,
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const messages = [
+    "Analyzing writing patterns...",
+    "Detecting tone preferences...",
+    "Processing communication style...",
+    "Identifying unique traits...",
+    "Generating personalized insights..."
+  ];
+
   return (
     <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
       <div className="text-center">
@@ -14,20 +60,19 @@ const AnalyzingLoader: React.FC = () => {
         >
           <div className="relative">
             <motion.div
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 1, 0.5]
-              }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
+              variants={pulseVariants}
+              initial="initial"
+              animate="animate"
               className="absolute inset-0 bg-blue-200 rounded-full blur-xl"
             />
-            <div className="relative bg-blue-600 text-white p-6 rounded-full">
+            <motion.div 
+              variants={brainVariants}
+              initial="initial"
+              animate="animate"
+              className="relative bg-blue-600 text-white p-6 rounded-full transform-gpu"
+            >
               <Brain size={48} />
-            </div>
+            </motion.div>
           </div>
         </motion.div>
         
@@ -40,14 +85,28 @@ const AnalyzingLoader: React.FC = () => {
           Analyzing Your Responses
         </motion.h2>
         
-        <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-gray-600 max-w-md mx-auto"
-        >
-          Our AI is processing your answers to create a detailed analysis of your unique writing style...
-        </motion.p>
+        <div className="h-6 overflow-hidden">
+          {messages.map((message, index) => (
+            <motion.p
+              key={index}
+              custom={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: [0, 1, 0],
+                y: [-20, 0, 20]
+              }}
+              transition={{
+                duration: 3,
+                delay: index * 3,
+                repeat: Infinity,
+                repeatDelay: messages.length * 3 - 3
+              }}
+              className="text-gray-600"
+            >
+              {message}
+            </motion.p>
+          ))}
+        </div>
       </div>
     </div>
   );
