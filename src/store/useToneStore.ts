@@ -118,75 +118,71 @@ export const useToneStore = create<ToneState>()(
       
       saveTone: async (name: string, userId: string) => {
         try {
+          console.log('Starting save operation...', { name, userId });
           set({ loading: true, error: null });
           const { currentTone } = get();
           
-          // If we have an ID, update the existing tone
+          const toneData = {
+            name: name || currentTone.title,
+            formality: currentTone.formality,
+            brevity: currentTone.brevity,
+            humor: currentTone.humor,
+            warmth: currentTone.warmth,
+            directness: currentTone.directness,
+            expressiveness: currentTone.expressiveness,
+            summary: currentTone.summary,
+            prompt: currentTone.prompt,
+            examples: currentTone.examples,
+          };
+          
           if (currentTone.id) {
-            const updates = {
-              name: name || currentTone.title,
-              formality: currentTone.formality,
-              brevity: currentTone.brevity,
-              humor: currentTone.humor,
-              warmth: currentTone.warmth,
-              directness: currentTone.directness,
-              expressiveness: currentTone.expressiveness,
-              summary: currentTone.summary,
-              prompt: currentTone.prompt,
-              examples: currentTone.examples,
-            };
-            
-            const { error } = await supabase
+            console.log('Updating existing tone:', currentTone.id);
+            const { data, error } = await supabase
               .from('tone_profiles')
-              .update(updates)
-              .eq('id', currentTone.id);
+              .update(toneData)
+              .eq('id', currentTone.id)
+              .select()
+              .single();
             
-            if (error) throw error;
+            if (error) {
+              console.error('Error updating tone:', error);
+              throw error;
+            }
             
-            // Update both savedTones and originalTone to reflect the changes
-            const updatedTone = { ...get().originalTone, ...updates } as ToneProfile;
+            if (data) {
+              console.log('Tone updated successfully:', data);
+              set((state) => ({
+                savedTones: state.savedTones.map((tone) =>
+                  tone.id === currentTone.id ? data : tone
+                ),
+                originalTone: data,
+                hasRegenerated: false,
+              }));
+            }
+          } else {
+            console.log('Creating new tone');
+            const { data, error } = await supabase
+              .from('tone_profiles')
+              .insert([{ ...toneData, user_id: userId }])
+              .select()
+              .single();
             
-            set((state) => ({
-              savedTones: state.savedTones.map((tone) =>
-                tone.id === currentTone.id ? updatedTone : tone
-              ),
-              originalTone: updatedTone,
-              hasRegenerated: false,
-            }));
+            if (error) {
+              console.error('Error creating tone:', error);
+              throw error;
+            }
             
-            return;
-          }
-          
-          // Otherwise create a new tone
-          const { data, error } = await supabase
-            .from('tone_profiles')
-            .insert([
-              {
-                user_id: userId,
-                name: name || currentTone.title,
-                formality: currentTone.formality,
-                brevity: currentTone.brevity,
-                humor: currentTone.humor,
-                warmth: currentTone.warmth,
-                directness: currentTone.directness,
-                expressiveness: currentTone.expressiveness,
-                summary: currentTone.summary,
-                prompt: currentTone.prompt,
-                examples: currentTone.examples,
-              },
-            ])
-            .select();
-          
-          if (error) throw error;
-          
-          if (data) {
-            set((state) => ({
-              savedTones: [...state.savedTones, data[0] as ToneProfile],
-              originalTone: data[0] as ToneProfile,
-              hasRegenerated: false,
-            }));
+            if (data) {
+              console.log('New tone created successfully:', data);
+              set((state) => ({
+                savedTones: [...state.savedTones, data],
+                originalTone: data,
+                hasRegenerated: false,
+              }));
+            }
           }
         } catch (error) {
+          console.error('Save operation failed:', error);
           set({ error: (error as Error).message });
           throw error;
         } finally {
@@ -201,7 +197,8 @@ export const useToneStore = create<ToneState>()(
           const { data, error } = await supabase
             .from('tone_profiles')
             .select('*')
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
           
           if (error) throw error;
           
@@ -228,6 +225,7 @@ export const useToneStore = create<ToneState>()(
           
           set((state) => ({
             savedTones: state.savedTones.filter((tone) => tone.id !== toneId),
+            originalTone: state.originalTone?.id === toneId ? null : state.originalTone,
           }));
         } catch (error) {
           set({ error: (error as Error).message });
@@ -245,28 +243,27 @@ export const useToneStore = create<ToneState>()(
           
           const { data, error } = await supabase
             .from('tone_profiles')
-            .insert([
-              {
-                user_id: userId,
-                name: `${toneToDuplicate.name} (Copy)`,
-                formality: toneToDuplicate.formality,
-                brevity: toneToDuplicate.brevity,
-                humor: toneToDuplicate.humor,
-                warmth: toneToDuplicate.warmth,
-                directness: toneToDuplicate.directness,
-                expressiveness: toneToDuplicate.expressiveness,
-                summary: toneToDuplicate.summary,
-                prompt: toneToDuplicate.prompt,
-                examples: toneToDuplicate.examples,
-              },
-            ])
-            .select();
+            .insert([{
+              user_id: userId,
+              name: `${toneToDuplicate.name} (Copy)`,
+              formality: toneToDuplicate.formality,
+              brevity: toneToDuplicate.brevity,
+              humor: toneToDuplicate.humor,
+              warmth: toneToDuplicate.warmth,
+              directness: toneToDuplicate.directness,
+              expressiveness: toneToDuplicate.expressiveness,
+              summary: toneToDuplicate.summary,
+              prompt: toneToDuplicate.prompt,
+              examples: toneToDuplicate.examples,
+            }])
+            .select()
+            .single();
           
           if (error) throw error;
           
           if (data) {
             set((state) => ({
-              savedTones: [...state.savedTones, data[0] as ToneProfile],
+              savedTones: [...state.savedTones, data],
             }));
           }
         } catch (error) {
@@ -281,22 +278,24 @@ export const useToneStore = create<ToneState>()(
         try {
           set({ loading: true, error: null });
           
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('tone_profiles')
             .update(updates)
-            .eq('id', toneId);
+            .eq('id', toneId)
+            .select()
+            .single();
           
           if (error) throw error;
           
-          set((state) => ({
-            savedTones: state.savedTones.map((tone) =>
-              tone.id === toneId ? { ...tone, ...updates } : tone
-            ),
-            originalTone: state.originalTone?.id === toneId ? 
-              { ...state.originalTone, ...updates } : 
-              state.originalTone,
-            hasRegenerated: false,
-          }));
+          if (data) {
+            set((state) => ({
+              savedTones: state.savedTones.map((tone) =>
+                tone.id === toneId ? data : tone
+              ),
+              originalTone: state.originalTone?.id === toneId ? data : state.originalTone,
+              hasRegenerated: false,
+            }));
+          }
         } catch (error) {
           set({ error: (error as Error).message });
           throw error;
@@ -311,6 +310,7 @@ export const useToneStore = create<ToneState>()(
             ...state.currentTone,
             ...traits,
           },
+          hasRegenerated: true,
         }));
       },
       
@@ -335,8 +335,24 @@ export const useToneStore = create<ToneState>()(
       },
       
       hasUnsavedChanges: () => {
-        const { hasRegenerated } = get();
-        return hasRegenerated;
+        const { currentTone, originalTone, hasRegenerated } = get();
+        
+        if (!originalTone) {
+          return hasRegenerated;
+        }
+        
+        return hasRegenerated || (
+          currentTone.formality !== originalTone.formality ||
+          currentTone.brevity !== originalTone.brevity ||
+          currentTone.humor !== originalTone.humor ||
+          currentTone.warmth !== originalTone.warmth ||
+          currentTone.directness !== originalTone.directness ||
+          currentTone.expressiveness !== originalTone.expressiveness ||
+          currentTone.title !== originalTone.name ||
+          currentTone.summary !== originalTone.summary ||
+          currentTone.prompt !== originalTone.prompt ||
+          JSON.stringify(currentTone.examples) !== JSON.stringify(originalTone.examples)
+        );
       },
       
       resetCurrentTone: () => {
