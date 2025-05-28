@@ -93,7 +93,6 @@ export const useToneStore = create<ToneState>()(
           set({ loading: true, error: null, isQuotaExceeded: false });
           const { currentTone } = get();
           
-          // Extract current traits
           const traits = {
             formality: currentTone.formality,
             brevity: currentTone.brevity,
@@ -103,7 +102,6 @@ export const useToneStore = create<ToneState>()(
             expressiveness: currentTone.expressiveness,
           };
           
-          // Generate new content in parallel
           const [summaryResult, examplesResult] = await Promise.all([
             generateToneSummary(traits),
             generateToneExamples(traits),
@@ -113,7 +111,6 @@ export const useToneStore = create<ToneState>()(
             throw new Error('Failed to generate content. Please try again.');
           }
           
-          // Update the current tone with new content
           set(state => ({
             currentTone: {
               ...state.currentTone,
@@ -124,7 +121,6 @@ export const useToneStore = create<ToneState>()(
             },
           }));
           
-          // If we're editing an existing tone, save the changes
           if (currentTone.id) {
             await get().updateTone(currentTone.id, {
               name: summaryResult.title,
@@ -314,6 +310,9 @@ export const useToneStore = create<ToneState>()(
             ...traits,
           },
         }));
+        
+        // Automatically generate new content when traits change
+        get().generateContent().catch(console.error);
       },
       
       setCurrentToneFromProfile: (tone) => {

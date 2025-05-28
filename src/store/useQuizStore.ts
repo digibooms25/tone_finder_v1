@@ -182,7 +182,7 @@ export const useQuizStore = create<QuizState>()(
             throw error;
           }
           console.error('Error calculating traits:', error);
-          throw error; // Propagate the error to be handled by the caller
+          throw error;
         }
       },
       
@@ -192,7 +192,7 @@ export const useQuizStore = create<QuizState>()(
             ...state.traits,
             ...traits,
           },
-          isComplete: true // Set isComplete to true when traits are updated directly
+          isComplete: true
         }));
       },
       
