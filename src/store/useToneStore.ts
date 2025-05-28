@@ -68,7 +68,6 @@ export const useToneStore = create<ToneState>()(
       
       hasUnsavedChanges: () => {
         const { currentTone, savedTones } = get();
-        
         if (!currentTone.id) return false;
         
         const savedTone = savedTones.find(tone => tone.id === currentTone.id);
@@ -310,9 +309,6 @@ export const useToneStore = create<ToneState>()(
             ...traits,
           },
         }));
-        
-        // Automatically generate new content when traits change
-        get().generateContent().catch(console.error);
       },
       
       setCurrentToneFromProfile: (tone) => {
