@@ -59,21 +59,22 @@ const Landing: React.FC = () => {
             Take a 5-minute test to discover your unique voice, and get a custom tone prompt you can use anywhere.
           </p>
 
-          <motion.div
-            className="flex justify-center"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              size="lg"
-              onClick={handleStartTest}
-              className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
-              iconPosition="right"
+          <div className="flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Start Tone Test
-            </Button>
-          </motion.div>
+              <Button
+                size="lg"
+                onClick={handleStartTest}
+                className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
+                icon={<ArrowRight className="ml-2" size={24} />}
+                iconPosition="right"
+              >
+                Start Tone Test
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
       </section>
 
