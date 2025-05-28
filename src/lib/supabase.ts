@@ -22,6 +22,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export type User = {
   id: string;
   email: string;
+  email_confirmed_at: string | null;
 };
 
 export type ToneProfile = {

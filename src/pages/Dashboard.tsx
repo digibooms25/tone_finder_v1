@@ -6,7 +6,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useQuizStore } from '../store/useQuizStore';
 import ToneCard from '../components/ToneCard';
 import Button from '../components/Button';
-import { PlusCircle, Sparkles, Brain, Wand2, ChevronDown, FileText } from 'lucide-react';
+import { PlusCircle, Sparkles, Brain, Wand2, ChevronDown, FileText, AlertTriangle, Mail } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -63,12 +63,40 @@ const Dashboard: React.FC = () => {
     setShowDropdown(false);
     
     if (path === '/quiz') {
-      // Reset both quiz and tone state before starting new test
       resetQuiz();
       resetCurrentTone();
     }
     
     navigate(path);
+  };
+
+  const renderEmailConfirmationWarning = () => {
+    if (user && !user.email_confirmed_at) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg mb-6 shadow-md"
+        >
+          <div className="flex items-start">
+            <AlertTriangle className="text-amber-500 mr-3 flex-shrink-0 mt-1" size={20} />
+            <div>
+              <h3 className="text-amber-800 font-semibold">Email Confirmation Required</h3>
+              <p className="text-amber-700 mt-1">
+                Please check your inbox at <span className="font-medium">{user.email}</span> and click the confirmation link to access all features.
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <Mail size={16} className="text-amber-600" />
+                <span className="text-sm text-amber-600">
+                  Can't find the email? Check your spam folder.
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+    return null;
   };
 
   const renderEmptyState = () => (
@@ -118,6 +146,8 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-4 max-w-6xl relative">
+        {renderEmailConfirmationWarning()}
+        
         <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-12">
           <div>
             <motion.div

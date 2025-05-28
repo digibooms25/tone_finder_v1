@@ -25,13 +25,19 @@ export const useAuthStore = create<AuthState>((set) => ({
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          throw new Error('Please check your email and confirm your account before signing in.');
+        }
+        throw error;
+      }
       
       if (data.user) {
         set({ 
           user: { 
             id: data.user.id, 
             email: data.user.email || '',
+            email_confirmed_at: data.user.email_confirmed_at
           },
           error: null 
         });
@@ -58,6 +64,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           user: { 
             id: data.user.id, 
             email: data.user.email || '',
+            email_confirmed_at: data.user.email_confirmed_at
           },
           error: null
         });
@@ -102,6 +109,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         user: { 
           id: session.user.id, 
           email: session.user.email || '',
+          email_confirmed_at: session.user.email_confirmed_at
         },
         error: null
       });
@@ -121,14 +129,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       
-      // Get the current session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         throw new Error('No active session found');
       }
 
-      // Call the Edge Function to delete the user
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
         {
@@ -145,7 +151,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         throw new Error(error.error || 'Failed to delete account');
       }
 
-      // Clear local state
       set({ user: null, error: null });
     } catch (error) {
       set({ error: (error as Error).message });
