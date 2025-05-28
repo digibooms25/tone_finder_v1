@@ -67,7 +67,8 @@ export const scoreFreeTextResponse = async (text: string): Promise<typeof defaul
         messages: [
           {
             role: 'system',
-            content: `You are an expert at analyzing writing style and tone. Score the following text on these traits:
+            content: `You are an expert at analyzing writing style and tone. Your task is to score the following text on these traits, providing a score between -1 and 1 for each:
+
 - Formality (-1 very casual to +1 very formal)
 - Brevity (-1 verbose to +1 concise)
 - Humor (-1 serious to +1 playful)
@@ -75,34 +76,58 @@ export const scoreFreeTextResponse = async (text: string): Promise<typeof defaul
 - Directness (-1 indirect to +1 direct)
 - Expressiveness (-1 reserved to +1 expressive)
 
-Respond with ONLY a JSON object containing numeric scores between -1 and 1 for each trait.`
+Analyze the text carefully and provide accurate scores. Respond with ONLY a JSON object containing the scores.
+
+Example response format:
+{
+  "formality": 0.7,
+  "brevity": -0.3,
+  "humor": 0.2,
+  "warmth": 0.8,
+  "directness": 0.5,
+  "expressiveness": 0.4
+}`
           },
           { role: 'user', content: text }
-        ]
+        ],
+        temperature: 0.3 // Lower temperature for more consistent scoring
       });
     });
 
     const content = response.choices[0]?.message.content;
     if (!content) {
-      return defaultScores;
+      console.error('No content in OpenAI response');
+      throw new Error('Failed to analyze text. Please try again.');
     }
 
-    const scores = JSON.parse(content);
-    const normalizedScores = { ...defaultScores };
+    try {
+      const scores = JSON.parse(content);
+      
+      // Validate the response format
+      const requiredTraits = Object.keys(defaultScores);
+      const hasAllTraits = requiredTraits.every(trait => 
+        typeof scores[trait] === 'number' && 
+        !isNaN(scores[trait]) &&
+        scores[trait] >= -1 &&
+        scores[trait] <= 1
+      );
 
-    Object.entries(scores).forEach(([trait, score]) => {
-      if (trait in defaultScores && typeof score === 'number' && !isNaN(score)) {
-        normalizedScores[trait as keyof typeof defaultScores] = Math.max(-1, Math.min(1, score));
+      if (!hasAllTraits) {
+        console.error('Invalid score format received:', scores);
+        throw new Error('Invalid response format from analysis');
       }
-    });
 
-    return normalizedScores;
+      return scores;
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError, 'Content:', content);
+      throw new Error('Failed to process analysis results');
+    }
   } catch (error) {
     console.error('Error scoring free text:', error);
     if (isQuotaError(error)) {
       throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
     }
-    return defaultScores;
+    throw error;
   }
 };
 
