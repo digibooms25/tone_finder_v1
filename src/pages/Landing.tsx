@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
                 size="lg"
                 onClick={handleStartTest}
                 className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-                icon={<ArrowRight className="ml-2\" size={24} />}
+                icon={<ArrowRight className="ml-2" size={24} />}
                 iconPosition="right"
               >
                 Start Tone Test
@@ -98,25 +98,33 @@ const Landing: React.FC = () => {
           >
             {[
               {
+                icon: <PenTool size={32} />,
+                title: "Write Your Own Text",
+                description: "Create a tone profile from your custom writing sample.",
+                gradient: "from-emerald-500 to-emerald-600",
+                path: "/text",
+                enabled: true
+              },
+              {
                 icon: <Youtube size={32} />,
                 title: "Extract from YouTube Video",
                 description: "Analyze your speaking style from any YouTube video with captions.",
-                gradient: "from-red-500 to-red-600"
+                gradient: "from-red-500 to-red-600",
+                enabled: false
               },
               {
                 icon: <FileText size={32} />,
                 title: "Turn Blog Post into Your Tone",
                 description: "Convert your existing writing into a reusable tone profile.",
-                gradient: "from-emerald-500 to-emerald-600"
-              },
-              {
-                icon: <PenTool size={32} />,
-                title: "Write Your Own Text",
-                description: "Create a tone profile from your custom writing sample.",
-                gradient: "from-purple-500 to-purple-600"
+                gradient: "from-purple-500 to-purple-600",
+                enabled: false
               }
             ].map((method, index) => (
-              <div key={index} className="opacity-50 cursor-not-allowed">
+              <div 
+                key={index} 
+                className={method.enabled ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}
+                onClick={() => method.enabled && navigate(method.path)}
+              >
                 <div className={`h-full p-8 rounded-2xl bg-gradient-to-br ${method.gradient} shadow-xl`}>
                   <div className="relative text-white">
                     <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6">
@@ -125,7 +133,14 @@ const Landing: React.FC = () => {
                     <h3 className="text-2xl font-bold mb-4">{method.title}</h3>
                     <p className="leading-relaxed mb-6 opacity-90">{method.description}</p>
                     <div className="flex items-center font-medium">
-                      <span>Coming Soon</span>
+                      {method.enabled ? (
+                        <>
+                          <span>Try Now</span>
+                          <ArrowRight size={16} className="ml-2" />
+                        </>
+                      ) : (
+                        <span>Coming Soon</span>
+                      )}
                     </div>
                   </div>
                 </div>
