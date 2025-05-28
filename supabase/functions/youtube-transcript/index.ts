@@ -1,64 +1,35 @@
-import { YoutubeTranscript } from 'npm:youtube-transcript';
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-Deno.serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders
+    });
   }
 
   try {
-    const { videoId } = await req.json();
+    const { videoId, lang = "en" } = await req.json();
+    if (!videoId) throw new Error("Missing videoId");
 
-    if (!videoId) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Video ID is required',
-          details: 'Please provide a valid YouTube video URL' 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    const ytRes = await fetch(
+      `https://www.youtube.com/api/timedtext?` +
+      new URLSearchParams({ v: videoId, lang, fmt: "json3" })
+    );
+    if (!ytRes.ok) throw new Error(`YouTube returned ${ytRes.status}`);
 
-    // Add retries for transcript fetching with exponential backoff
-    let transcript;
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
-      try {
-        // Get the transcript directly
-        transcript = await YoutubeTranscript.fetchTranscript(videoId);
-        if (transcript) break;
-      } catch (error) {
-        attempts++;
-        console.error(`Attempt ${attempts} failed:`, error);
-        
-        if (attempts === maxAttempts) {
-          throw error;
-        }
-        
-        // Exponential backoff with jitter
-        const baseDelay = 1000 * Math.pow(2, attempts);
-        const jitter = Math.random() * 1000;
-        await sleep(baseDelay + jitter);
-      }
-    }
-    
-    if (!transcript || transcript.length === 0) {
+    const { events } = await ytRes.json();
+    if (!events || events.length === 0) {
       return new Response(
         JSON.stringify({ 
           error: 'No transcript available',
-          details: 'No captions were found for this video. Please ensure the video has captions enabled, or try a different video.' 
+          details: 'This video does not have captions enabled. Please try a different video that has captions or subtitles available.'
         }),
         { 
           status: 404, 
@@ -67,10 +38,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Combine transcript parts into a single text
-    const fullTranscript = transcript
-      .map(part => part.text)
-      .join(' ')
+    // Combine all transcript segments into a single text
+    const fullTranscript = events
+      .map((e: any) => e.segs.map((s: any) => s.utf8).join(""))
+      .join(" ")
       // Clean up common transcript artifacts
       .replace(/\[.*?\]/g, '') // Remove bracketed content
       .replace(/\s+/g, ' ') // Normalize whitespace
@@ -106,34 +77,15 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
-  } catch (error) {
-    console.error('Transcript fetch error:', error);
 
-    // Handle specific error types
-    if (error.message?.includes('Could not get transcripts') || 
-        error.message?.includes('No transcript available') ||
-        error.message?.includes('Subtitles are disabled') ||
-        error.message?.includes('No available transcripts found') ||
-        error.message?.includes('Transcript is disabled')) {
+  } catch (err: any) {
+    console.error("Transcript fetch error:", err);
+    
+    if (err.message?.includes('Missing videoId')) {
       return new Response(
         JSON.stringify({ 
-          error: 'No transcript available',
-          details: 'This video does not have captions enabled. Please try a different video that has captions or subtitles available.'
-        }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    if (error.message?.includes('Invalid video id') || 
-        error.message?.includes('Video id not found') ||
-        error.message?.includes('Video unavailable')) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid video ID',
-          details: 'The provided YouTube URL is invalid or the video is unavailable. Please check the URL and try again.'
+          error: 'Video ID is required',
+          details: 'Please provide a valid YouTube video URL'
         }),
         { 
           status: 400, 
@@ -146,12 +98,12 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         error: 'Failed to fetch transcript',
         details: 'An unexpected error occurred while fetching the transcript. Please try again later.',
-        message: error.message
+        message: err.message
       }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
+      }
     );
   }
 });
