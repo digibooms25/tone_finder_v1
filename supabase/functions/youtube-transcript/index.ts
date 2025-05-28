@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     while (attempts < maxAttempts) {
       try {
         // Try to get the transcript list first to check availability
-        const transcriptList = await YoutubeTranscriptModule.YoutubeTranscript.listTranscripts(videoId);
+        const transcriptList = await YoutubeTranscriptModule.listTranscripts(videoId);
         
         try {
           // Try to get English transcript first
