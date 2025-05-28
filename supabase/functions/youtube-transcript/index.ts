@@ -37,8 +37,31 @@ Deno.serve(async (req) => {
 
     while (attempts < maxAttempts) {
       try {
-        transcript = await YoutubeTranscript.fetchTranscript(videoId);
-        break;
+        // First check if captions are available
+        const transcriptList = await YoutubeTranscript.listTranscripts(videoId);
+        
+        // Try to get English transcript first
+        try {
+          transcript = await transcriptList.findTranscript(['en']);
+        } catch {
+          // If no English transcript, try to get auto-generated English transcript
+          try {
+            transcript = await transcriptList.findTranscript(['en-US', 'en-GB', 'en-AU']);
+          } catch {
+            // If still no transcript, try to get any transcript and translate it
+            const availableTranscripts = await transcriptList.getTranscripts();
+            if (availableTranscripts.length > 0) {
+              transcript = await availableTranscripts[0].translate('en');
+            }
+          }
+        }
+
+        if (transcript) {
+          transcript = await transcript.fetch();
+          break;
+        }
+
+        throw new Error('No available transcripts found');
       } catch (error) {
         lastError = error;
         attempts++;
@@ -56,7 +79,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'No transcript available',
-          details: 'This video either has no captions or they are disabled. Please try a different video with available captions.' 
+          details: 'No captions were found for this video. Please ensure the video has captions enabled, or try a different video.' 
         }),
         { 
           status: 404, 
@@ -110,11 +133,12 @@ Deno.serve(async (req) => {
     // Handle specific error types
     if (error.message?.includes('Could not get transcripts') || 
         error.message?.includes('No transcript available') ||
-        error.message?.includes('Subtitles are disabled')) {
+        error.message?.includes('Subtitles are disabled') ||
+        error.message?.includes('No available transcripts found')) {
       return new Response(
         JSON.stringify({ 
-          error: 'Transcript unavailable',
-          details: 'Could not access captions for this video. Please ensure the video has English captions enabled.'
+          error: 'No transcript available',
+          details: 'No captions were found for this video. Please ensure the video has captions enabled, or try a different video.'
         }),
         { 
           status: 404, 
