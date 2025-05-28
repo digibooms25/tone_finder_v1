@@ -1,4 +1,4 @@
-import { YoutubeTranscript } from 'npm:youtube-transcript@1.0.6';
+import YoutubeTranscript from 'npm:youtube-transcript@1.0.6';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
