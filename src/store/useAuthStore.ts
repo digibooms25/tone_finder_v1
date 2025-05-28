@@ -121,18 +121,23 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       
+      // Get the current user first
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('No user found');
+      }
+
       // Delete user data first (RLS policies will handle this)
       const { error: deleteError } = await supabase
         .from('tone_profiles')
         .delete()
-        .eq('user_id', supabase.auth.getUser());
+        .eq('user_id', user.id);
       
       if (deleteError) throw deleteError;
 
       // Delete the user account
-      const { error } = await supabase.auth.admin.deleteUser(
-        (await supabase.auth.getUser()).data.user?.id || ''
-      );
+      const { error } = await supabase.auth.admin.deleteUser(user.id);
       
       if (error) throw error;
 
