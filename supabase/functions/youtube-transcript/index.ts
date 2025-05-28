@@ -33,23 +33,42 @@ Deno.serve(async (req) => {
     let transcript;
     let attempts = 0;
     const maxAttempts = 3;
-    let lastError;
 
     while (attempts < maxAttempts) {
       try {
-        transcript = await YoutubeTranscript.fetchTranscript(videoId);
+        // Try to get the transcript list first to check availability
+        const transcriptList = await YoutubeTranscript.listTranscripts(videoId);
         
-        if (transcript && transcript.length > 0) {
+        try {
+          // Try to get English transcript first
+          transcript = await transcriptList.findTranscript(['en']);
+        } catch {
+          try {
+            // Try auto-generated English transcript
+            transcript = await transcriptList.findTranscript(['en-US', 'en-GB', 'en-AU']);
+          } catch {
+            // Try any available transcript and translate to English
+            const transcripts = await transcriptList.getTranscripts();
+            if (transcripts.length > 0) {
+              transcript = await transcripts[0].translate('en');
+            }
+          }
+        }
+
+        if (transcript) {
+          transcript = await transcript.fetch();
           break;
         }
 
         throw new Error('No available transcripts found');
       } catch (error) {
-        lastError = error;
         attempts++;
+        console.error(`Attempt ${attempts} failed:`, error);
+        
         if (attempts === maxAttempts) {
           throw error;
         }
+        
         // Exponential backoff with jitter
         const baseDelay = 1000 * Math.pow(2, attempts);
         const jitter = Math.random() * 1000;
