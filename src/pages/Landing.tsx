@@ -99,7 +99,7 @@ const Landing: React.FC = () => {
             {[
               {
                 icon: <PenTool size={32} />,
-                title: "Write Your Own Text",
+                title: "Text-to-Tone",
                 description: "Create a tone profile from your custom writing sample.",
                 gradient: "from-emerald-500 to-emerald-600",
                 path: "/text",
