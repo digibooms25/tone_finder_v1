@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToneStore } from '../store/useToneStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { useQuizStore } from '../store/useQuizStore';
 import ToneCard from '../components/ToneCard';
 import Button from '../components/Button';
 import { PlusCircle, Sparkles, Brain, Wand2, ChevronDown, FileText } from 'lucide-react';
@@ -16,8 +17,10 @@ const Dashboard: React.FC = () => {
     duplicateTone,
     updateTone,
     loading, 
-    setCurrentToneFromProfile 
+    setCurrentToneFromProfile,
+    resetCurrentTone
   } = useToneStore();
+  const { resetQuiz } = useQuizStore();
   const { user } = useAuthStore();
   const [message, setMessage] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -58,11 +61,14 @@ const Dashboard: React.FC = () => {
 
   const handleOptionSelect = (path: string) => {
     setShowDropdown(false);
+    
+    if (path === '/quiz') {
+      // Reset both quiz and tone state before starting new test
+      resetQuiz();
+      resetCurrentTone();
+    }
+    
     navigate(path);
-  };
-  
-  const handleNewTone = () => {
-    navigate('/quiz');
   };
 
   const renderEmptyState = () => (
@@ -90,7 +96,7 @@ const Dashboard: React.FC = () => {
               whileTap={{ scale: 0.98 }}
             >
               <Button
-                onClick={handleNewTone}
+                onClick={() => handleOptionSelect('/quiz')}
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-xl"
                 icon={<PlusCircle size={20} />}
