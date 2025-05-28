@@ -15,34 +15,83 @@ serve(async (req) => {
   }
 
   try {
-    const { videoId, lang = "en" } = await req.json();
-    if (!videoId) throw new Error("Missing videoId");
-
-    const ytRes = await fetch(
-      `https://www.youtube.com/api/timedtext?` +
-      new URLSearchParams({ v: videoId, lang, fmt: "json3" })
-    );
-    if (!ytRes.ok) throw new Error(`YouTube API request failed with status ${ytRes.status}`);
-
-    const data = await ytRes.json();
-    if (!data || !data.events || data.events.length === 0) {
+    const { videoId } = await req.json();
+    if (!videoId) {
       return new Response(
-        JSON.stringify({ 
-          error: 'No transcript available',
-          details: 'This video does not have captions enabled. Please try a different video that has captions or subtitles available.'
+        JSON.stringify({
+          error: 'Missing video ID',
+          details: 'Please provide a valid YouTube video ID'
         }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    // Combine all transcript segments into a single text
-    const fullTranscript = data.events
-      .map((e: any) => e.segs.map((s: any) => s.utf8).join(""))
-      .join(" ")
-      // Clean up common transcript artifacts
+    // First, fetch the caption tracks available for the video
+    const trackListUrl = `https://youtube.com/watch?v=${videoId}`;
+    const response = await fetch(trackListUrl);
+    const html = await response.text();
+
+    // Extract caption track data from the YouTube page
+    const captionTrackPattern = /"captionTracks":\[(.*?)\]/;
+    const match = html.match(captionTrackPattern);
+    
+    if (!match) {
+      return new Response(
+        JSON.stringify({
+          error: 'No captions available',
+          details: 'This video does not have any captions or subtitles available.'
+        }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Parse the caption tracks and find the English one (or first available)
+    const captionTracks = JSON.parse(`[${match[1]}]`);
+    const englishTrack = captionTracks.find((track: any) => 
+      track.languageCode === 'en' || track.vssId.includes('.en')
+    ) || captionTracks[0];
+
+    if (!englishTrack || !englishTrack.baseUrl) {
+      return new Response(
+        JSON.stringify({
+          error: 'No suitable captions found',
+          details: 'Could not find appropriate captions for this video.'
+        }),
+        {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Fetch the actual transcript
+    const transcriptResponse = await fetch(englishTrack.baseUrl);
+    const transcriptXml = await transcriptResponse.text();
+
+    // Extract text from XML
+    const textPattern = /<text[^>]*>(.*?)<\/text>/g;
+    let transcript = '';
+    let match2;
+    
+    while ((match2 = textPattern.exec(transcriptXml)) !== null) {
+      // Decode HTML entities and add to transcript
+      const text = match2[1]
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+      transcript += text + ' ';
+    }
+
+    // Clean up the transcript
+    transcript = transcript
       .replace(/\[.*?\]/g, '') // Remove bracketed content
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/(\w)\s+([.,!?])/g, '$1$2') // Fix spacing around punctuation
@@ -51,48 +100,44 @@ serve(async (req) => {
       .replace(/\s+/g, ' ') // Final whitespace cleanup
       .trim();
 
-    // Validate transcript length (approximately 2 minutes of speech)
-    const minWords = 200; // Average speaking rate is ~100-130 words per minute
-    const wordCount = fullTranscript.split(/\s+/).length;
+    // Validate transcript length
+    const minWords = 200;
+    const wordCount = transcript.split(/\s+/).length;
 
     if (wordCount < minWords) {
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: 'Transcript too short',
-          details: `The video transcript is too short for analysis. Please use a video with at least 2 minutes of speaking content (found ${wordCount} words, need at least ${minWords}).` 
+          details: `The video transcript is too short for analysis. Please use a video with at least 2 minutes of speaking content (found ${wordCount} words, need at least ${minWords}).`
         }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
     return new Response(
-      JSON.stringify({ 
-        transcript: fullTranscript,
+      JSON.stringify({
+        transcript,
         wordCount
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
 
-  } catch (err: any) {
-    console.error("Transcript fetch error:", err);
-    
-    // Standardize error response structure with safe error messages
-    const errorResponse = {
-      error: 'Failed to fetch transcript',
-      details: 'An unexpected error occurred while fetching the transcript. Please try again later.',
-      code: err.message === 'Missing videoId' ? 'MISSING_VIDEO_ID' : 'FETCH_ERROR'
-    };
+  } catch (err) {
+    console.error('Transcript fetch error:', err);
 
     return new Response(
-      JSON.stringify(errorResponse),
-      { 
-        status: err.message === 'Missing videoId' ? 400 : 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      JSON.stringify({
+        error: 'Failed to fetch transcript',
+        details: 'An unexpected error occurred while fetching the transcript. Please try again later.'
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
