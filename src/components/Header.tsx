@@ -47,9 +47,14 @@ const Header: React.FC = () => {
   return (
     <header className="bg-white shadow-sm relative z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
-          toneofvoice.ai
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
+            toneofvoice.ai
+          </Link>
+          <span className="text-sm text-gray-500 hidden sm:block">
+            Make AI sound like you
+          </span>
+        </div>
         
         {/* Menu Button */}
         <button
