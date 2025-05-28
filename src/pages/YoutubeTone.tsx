@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Youtube, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Youtube, AlertCircle } from 'lucide-react';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
 import { scoreFreeTextResponse } from '../lib/openai';
@@ -13,6 +13,7 @@ const YoutubeTone: React.FC = () => {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [details, setDetails] = useState<string | null>(null);
 
   const extractVideoId = (url: string) => {
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
@@ -23,10 +24,12 @@ const YoutubeTone: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setDetails(null);
     
     const videoId = extractVideoId(url);
     if (!videoId) {
-      setError('Please enter a valid YouTube URL');
+      setError('Invalid YouTube URL');
+      setDetails('Please enter a valid YouTube video URL');
       return;
     }
 
@@ -42,23 +45,28 @@ const YoutubeTone: React.FC = () => {
         body: JSON.stringify({ videoId }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to fetch transcript');
+        throw new Error(data.error || 'Failed to fetch transcript');
       }
 
-      const { transcript } = await response.json();
-      if (!transcript) {
-        throw new Error('No transcript available for this video');
+      if (!data.transcript) {
+        throw new Error('No transcript available');
       }
 
       // Score the transcript
-      const traits = await scoreFreeTextResponse(transcript);
+      const traits = await scoreFreeTextResponse(data.transcript);
       updateTraits(traits);
       
       // Navigate to results
       navigate('/results', { state: { fromQuiz: true } });
-    } catch (error) {
-      setError((error as Error).message);
+    } catch (error: any) {
+      setError(error.message);
+      // If the error response includes details, show them
+      if (error.details) {
+        setDetails(error.details);
+      }
       setIsLoading(false);
     }
   };
@@ -98,10 +106,15 @@ const YoutubeTone: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2"
+              className="mb-6 p-4 bg-red-50 rounded-lg"
             >
-              <AlertCircle size={20} />
-              <span>{error}</span>
+              <div className="flex items-center gap-2 text-red-700 font-medium">
+                <AlertCircle size={20} />
+                <span>{error}</span>
+              </div>
+              {details && (
+                <p className="mt-2 text-red-600 text-sm">{details}</p>
+              )}
             </motion.div>
           )}
 
@@ -134,7 +147,7 @@ const YoutubeTone: React.FC = () => {
             <Button
               type="submit"
               isLoading={isLoading}
-              className="w-full"
+              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
               icon={<Youtube size={18} />}
             >
               Analyze Video

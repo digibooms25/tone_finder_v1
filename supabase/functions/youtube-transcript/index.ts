@@ -31,18 +31,20 @@ Deno.serve(async (req) => {
     let transcript;
     let attempts = 0;
     const maxAttempts = 3;
+    let lastError;
 
     while (attempts < maxAttempts) {
       try {
         transcript = await YoutubeTranscript.fetchTranscript(videoId);
         break;
       } catch (error) {
+        lastError = error;
         attempts++;
         if (attempts === maxAttempts) {
           throw error;
         }
-        // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempts));
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts)));
       }
     }
     
@@ -67,14 +69,18 @@ Deno.serve(async (req) => {
       .replace(/\[.*?\]/g, '') // Remove bracketed content
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/(\w)\s+([.,!?])/g, '$1$2') // Fix spacing around punctuation
+      .replace(/[^\w\s.,!?'-]/g, '') // Remove special characters except basic punctuation
       .trim();
 
-    // Validate transcript length
-    if (fullTranscript.length < 100) {
+    // Validate transcript length (approximately 2 minutes of speech)
+    const minWords = 200; // Average speaking rate is ~100-130 words per minute
+    const wordCount = fullTranscript.split(/\s+/).length;
+
+    if (wordCount < minWords) {
       return new Response(
         JSON.stringify({ 
           error: 'Transcript too short',
-          details: 'The video transcript is too short for analysis. Please use a video with at least 2 minutes of speaking content.' 
+          details: `The video transcript is too short for analysis. Please use a video with at least 2 minutes of speaking content (found ${wordCount} words, need at least ${minWords}).` 
         }),
         { 
           status: 400, 
@@ -86,7 +92,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         transcript: fullTranscript,
-        wordCount: fullTranscript.split(/\s+/).length
+        wordCount
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -96,7 +102,7 @@ Deno.serve(async (req) => {
     console.error('Transcript fetch error:', error);
 
     // Handle specific error types
-    if (error.message?.includes('Could not get transcripts')) {
+    if (error.message?.includes('Could not get transcripts') || error.message?.includes('No transcript available')) {
       return new Response(
         JSON.stringify({ 
           error: 'Transcript unavailable',
@@ -109,7 +115,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (error.message?.includes('Invalid video id')) {
+    if (error.message?.includes('Invalid video id') || error.message?.includes('Video id not found')) {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid video ID',
@@ -125,7 +131,8 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to fetch transcript',
-        details: 'An unexpected error occurred. Please try again later.'
+        details: 'An unexpected error occurred. Please try again later.',
+        message: error.message
       }),
       { 
         status: 500, 
