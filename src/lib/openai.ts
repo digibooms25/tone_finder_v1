@@ -204,12 +204,13 @@ export const generateToneExamples = async (traits: typeof defaultScores): Promis
         messages: [
           {
             role: 'system',
-            content: `Create three examples (3-5 sentences each) demonstrating the given tone:
+            content: `Create four examples (3-5 sentences each) demonstrating the given tone:
 1. A professional email
 2. A social media post
 3. A customer service response
+4. A creative piece (a short poem or creative writing, 8-15 lines)
 
-Respond with a JSON object containing an "examples" array with three strings.`
+Respond with a JSON object containing an "examples" array with four strings.`
           },
           { role: 'user', content: JSON.stringify(traits) }
         ],
@@ -223,7 +224,7 @@ Respond with a JSON object containing an "examples" array with three strings.`
     }
 
     const result = JSON.parse(content);
-    if (!Array.isArray(result.examples) || result.examples.length !== 3) {
+    if (!Array.isArray(result.examples) || result.examples.length !== 4) {
       return null;
     }
 
