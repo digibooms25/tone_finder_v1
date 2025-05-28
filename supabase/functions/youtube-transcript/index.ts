@@ -113,11 +113,12 @@ Deno.serve(async (req) => {
     if (error.message?.includes('Could not get transcripts') || 
         error.message?.includes('No transcript available') ||
         error.message?.includes('Subtitles are disabled') ||
-        error.message?.includes('No available transcripts found')) {
+        error.message?.includes('No available transcripts found') ||
+        error.message?.includes('Transcript is disabled')) {
       return new Response(
         JSON.stringify({ 
           error: 'No transcript available',
-          details: 'No captions were found for this video. Please ensure the video has captions enabled, or try a different video.'
+          details: 'This video does not have captions enabled. Please try a different video that has captions or subtitles available.'
         }),
         { 
           status: 404, 
@@ -150,7 +151,7 @@ Deno.serve(async (req) => {
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
+        }
     );
   }
 });
