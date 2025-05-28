@@ -93,7 +93,7 @@ const TextTone: React.FC = () => {
               <FileText size={32} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Text Analysis</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Tone-to-Text</h1>
               <p className="text-gray-600">Analyze your writing style from any text</p>
             </div>
           </div>
