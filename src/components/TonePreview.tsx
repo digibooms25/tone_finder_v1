@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 
 interface TonePreviewProps {
   examples: string[];
@@ -7,6 +8,7 @@ interface TonePreviewProps {
 
 const TonePreview: React.FC<TonePreviewProps> = ({ examples = [] }) => {
   const [activeTab, setActiveTab] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
   
   const previewTypes = [
     'Professional Email',
@@ -19,20 +21,41 @@ const TonePreview: React.FC<TonePreviewProps> = ({ examples = [] }) => {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Tone in Action</h3>
       
-      <div className="flex border-b mb-4 overflow-x-auto">
-        {previewTypes.map((type, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveTab(index)}
-            className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
-              activeTab === index
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
+      <div className="relative mb-4">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg text-left flex items-center justify-between"
+        >
+          <span className="font-medium text-gray-700">{previewTypes[activeTab]}</span>
+          <ChevronDown
+            size={16}
+            className={`text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+        
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg py-1 z-10"
           >
-            {type}
-          </button>
-        ))}
+            {previewTypes.map((type, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setActiveTab(index);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-4 py-2 text-left hover:bg-gray-50 ${
+                  activeTab === index ? 'text-blue-600 font-medium' : 'text-gray-700'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </motion.div>
+        )}
       </div>
       
       <div className="bg-gray-50 p-4 rounded-md">
