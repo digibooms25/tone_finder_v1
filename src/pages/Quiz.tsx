@@ -25,7 +25,7 @@ const Quiz: React.FC = () => {
     calculateTraits,
     setCurrentQuestionIndex,
   } = useQuizStore();
-  const { resetCurrentTone } = useToneStore();
+  const { resetCurrentTone, generateContent } = useToneStore();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   useEffect(() => {
@@ -62,8 +62,9 @@ const Quiz: React.FC = () => {
   const handleComplete = async () => {
     setIsAnalyzing(true);
     try {
-      await calculateTraits();
-      navigate('/results', { state: { fromQuiz: true } });
+      const traits = await calculateTraits();
+      await generateContent(); // Generate content before navigation
+      navigate('/results');
     } catch (error) {
       console.error('Error calculating traits:', error);
       setIsAnalyzing(false);
@@ -111,7 +112,6 @@ const Quiz: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transform rotate-12" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl transform -rotate-12" />

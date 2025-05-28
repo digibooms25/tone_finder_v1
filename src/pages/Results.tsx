@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useQuizStore } from '../store/useQuizStore';
 import { useToneStore } from '../store/useToneStore';
@@ -10,12 +10,10 @@ import TonePreview from '../components/TonePreview';
 import CopyPromptButton from '../components/CopyPromptButton';
 import Button from '../components/Button';
 import AuthForm from '../components/AuthForm';
-import AnalyzingLoader from '../components/AnalyzingLoader';
 import { ArrowLeft, Sparkles, Wand2 } from 'lucide-react';
 
 const Results: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toneId } = useParams();
   const { traits: quizTraits, resetQuiz } = useQuizStore();
   const { 
@@ -33,69 +31,18 @@ const Results: React.FC = () => {
   
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [pendingName, setPendingName] = useState<string | null>(null);
   
-  useEffect(() => {
-    if (location.state?.fromQuiz) {
-      setIsGenerating(true);
-    }
-  }, []);
-  
-  useEffect(() => {
-    if (!toneId) {
-      setCurrentToneTraits(quizTraits);
-    }
-  }, [quizTraits, toneId]);
-  
-  useEffect(() => {
-    const generateInitialResults = async () => {
-      if (!toneId && !currentTone.summary && location.state?.fromQuiz) {
-        try {
-          await generateContent();
-        } catch (error) {
-          // Error is handled by the store
-        } finally {
-          setIsGenerating(false);
-        }
-      } else {
-        setIsGenerating(false);
-      }
-    };
-    
-    if (isGenerating) {
-      generateInitialResults();
-    }
-  }, [toneId, isGenerating]);
-
-  useEffect(() => {
-    const savePendingTone = async () => {
-      if (pendingName && user) {
-        try {
-          await saveTone(pendingName, user.id);
-          navigate('/dashboard');
-        } catch (error) {
-          console.error('Error saving tone:', error);
-        }
-        setPendingName(null);
-        setPendingSave(false);
-      }
-    };
-
-    savePendingTone();
-  }, [user, pendingName]);
-  
-  const handleTraitsChange = (traits: typeof quizTraits) => {
+  const handleTraitsChange = async (traits: typeof quizTraits) => {
     setCurrentToneTraits(traits);
   };
   
   const handleRegenerate = async () => {
     clearError();
-    setIsGenerating(true);
     try {
       await generateContent();
-    } finally {
-      setIsGenerating(false);
+    } catch (error) {
+      console.error('Error regenerating content:', error);
     }
   };
   
@@ -120,13 +67,8 @@ const Results: React.FC = () => {
     navigate('/dashboard');
   };
   
-  if (isGenerating) {
-    return <AnalyzingLoader />;
-  }
-  
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transform rotate-12" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl transform -rotate-12" />
@@ -234,7 +176,7 @@ const Results: React.FC = () => {
               }}
               onTraitsChange={handleTraitsChange}
               onRegenerate={handleRegenerate}
-              isLoading={loading || isGenerating}
+              isLoading={loading}
             />
           </div>
         </div>
