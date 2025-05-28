@@ -44,7 +44,6 @@ const retryWithExponentialBackoff = async <T>(
 };
 
 const isRetryableError = (error: any) => {
-  // Don't retry quota errors
   if (isQuotaError(error)) {
     return false;
   }
@@ -67,18 +66,18 @@ export const scoreFreeTextResponse = async (text: string): Promise<typeof defaul
         messages: [
           {
             role: 'system',
-            content: `You are an expert at analyzing writing style and tone. Your task is to score the following text on these traits, providing a score between -1 and 1 for each:
+            content: `You are an expert at analyzing writing style and tone. Your task is to analyze the following text and score it on these traits:
 
-- Formality (-1 very casual to +1 very formal)
-- Brevity (-1 verbose to +1 concise)
-- Humor (-1 serious to +1 playful)
-- Warmth (-1 detached to +1 warm)
-- Directness (-1 indirect to +1 direct)
-- Expressiveness (-1 reserved to +1 expressive)
+- Formality: Score from -1 (very casual) to +1 (very formal)
+- Brevity: Score from -1 (verbose) to +1 (concise)
+- Humor: Score from -1 (serious) to +1 (playful)
+- Warmth: Score from -1 (detached) to +1 (warm)
+- Directness: Score from -1 (indirect) to +1 (direct)
+- Expressiveness: Score from -1 (reserved) to +1 (expressive)
 
 Analyze the text carefully and provide accurate scores. Respond with ONLY a JSON object containing the scores.
 
-Example response format:
+Example response:
 {
   "formality": 0.7,
   "brevity": -0.3,
@@ -90,13 +89,12 @@ Example response format:
           },
           { role: 'user', content: text }
         ],
-        temperature: 0.3 // Lower temperature for more consistent scoring
+        temperature: 0.1 // Lower temperature for more consistent scoring
       });
     });
 
     const content = response.choices[0]?.message.content;
     if (!content) {
-      console.error('No content in OpenAI response');
       throw new Error('Failed to analyze text. Please try again.');
     }
 
@@ -113,7 +111,6 @@ Example response format:
       );
 
       if (!hasAllTraits) {
-        console.error('Invalid score format received:', scores);
         throw new Error('Invalid response format from analysis');
       }
 
@@ -125,7 +122,7 @@ Example response format:
   } catch (error) {
     console.error('Error scoring free text:', error);
     if (isQuotaError(error)) {
-      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes.');
     }
     throw error;
   }
@@ -139,7 +136,6 @@ export class OpenAIQuotaError extends Error {
 }
 
 const isQuotaError = (error: any) => {
-  // Check for both the status code and message content
   return (
     error?.status === 429 || 
     (error?.message && (
@@ -194,7 +190,7 @@ Respond with a JSON object containing "title", "summary", and "prompt" keys.`
   } catch (error) {
     console.error('Error generating tone summary:', error);
     if (isQuotaError(error)) {
-      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes.');
     }
     throw error;
   }
@@ -235,7 +231,7 @@ Respond with a JSON object containing an "examples" array with three strings.`
   } catch (error) {
     console.error('Error generating tone examples:', error);
     if (isQuotaError(error)) {
-      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.');
+      throw new OpenAIQuotaError('OpenAI API quota exceeded. Please try again in a few minutes.');
     }
     throw error;
   }
