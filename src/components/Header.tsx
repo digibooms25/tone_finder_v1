@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useQuizStore } from '../store/useQuizStore';
 import Button from './Button';
-import { LogIn, LogOut, User, Menu, X, PlusCircle, LayoutDashboard } from 'lucide-react';
+import { LogIn, LogOut, User, Menu, X, PlusCircle, LayoutDashboard, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
@@ -95,6 +95,14 @@ const Header: React.FC = () => {
                 >
                   <PlusCircle size={16} />
                   New Tone
+                </button>
+
+                <button
+                  onClick={() => handleNavigation('/text')}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                >
+                  <FileText size={16} />
+                  Text Analysis
                 </button>
                 
                 {user ? (
