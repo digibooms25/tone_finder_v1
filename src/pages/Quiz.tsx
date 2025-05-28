@@ -25,7 +25,7 @@ const Quiz: React.FC = () => {
     calculateTraits,
     setCurrentQuestionIndex,
   } = useQuizStore();
-  const { resetCurrentTone, generateContent } = useToneStore();
+  const { resetCurrentTone, setCurrentToneTraits, generateContent } = useToneStore();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   useEffect(() => {
@@ -62,8 +62,16 @@ const Quiz: React.FC = () => {
   const handleComplete = async () => {
     setIsAnalyzing(true);
     try {
+      // Calculate traits from quiz answers
       const traits = await calculateTraits();
-      await generateContent(); // Generate content before navigation
+      
+      // Update tone store with traits
+      setCurrentToneTraits(traits);
+      
+      // Generate tone content
+      await generateContent();
+      
+      // Navigate to results
       navigate('/results');
     } catch (error) {
       console.error('Error calculating traits:', error);

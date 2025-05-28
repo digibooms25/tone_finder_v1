@@ -69,7 +69,7 @@ export const useQuizStore = create<QuizState>()(
           set({ currentQuestionIndex: index });
         }
       },
-
+      
       setCurrentQuestionIndex: (index: number) => {
         set({ currentQuestionIndex: index });
       },
@@ -81,10 +81,6 @@ export const useQuizStore = create<QuizState>()(
             [questionId]: answer,
           },
         }));
-      },
-
-      setError: (error: string | null) => {
-        set({ error });
       },
       
       calculateTraits: async () => {
@@ -101,7 +97,7 @@ export const useQuizStore = create<QuizState>()(
         };
         
         try {
-          // Process choice and multi_select questions
+          // Process multiple choice and multi-select questions first
           for (const question of questions) {
             const answer = answers[question.id];
             if (!answer) continue;
@@ -134,28 +130,28 @@ export const useQuizStore = create<QuizState>()(
           }
           
           // Process free text questions
-          for (const question of questions) {
-            if (question.type === 'freeText') {
-              const text = answers[question.id] as string;
-              if (text) {
-                try {
-                  const scores = await scoreFreeTextResponse(text);
-                  Object.entries(scores).forEach(([trait, value]) => {
-                    const traitKey = trait as keyof ToneTraits;
-                    if (traitKey in traitScores) {
-                      traitScores[traitKey].push(value);
-                    }
-                  });
-                } catch (error) {
-                  if (error instanceof OpenAIQuotaError) {
-                    set({ 
-                      error: 'OpenAI API quota exceeded. Please try again in a few minutes.',
-                      isComplete: false 
-                    });
-                    throw error;
+          const freeTextQuestions = questions.filter(q => q.type === 'freeText');
+          for (const question of freeTextQuestions) {
+            const text = answers[question.id] as string;
+            if (text?.trim()) {
+              try {
+                const scores = await scoreFreeTextResponse(text);
+                Object.entries(scores).forEach(([trait, value]) => {
+                  const traitKey = trait as keyof ToneTraits;
+                  if (traitKey in traitScores) {
+                    traitScores[traitKey].push(value);
                   }
-                  console.error('Error scoring free text:', error);
+                });
+              } catch (error) {
+                if (error instanceof OpenAIQuotaError) {
+                  set({ 
+                    error: 'OpenAI API quota exceeded. Please try again in a few minutes.',
+                    isComplete: false 
+                  });
+                  throw error;
                 }
+                console.error('Error scoring free text:', error);
+                throw error;
               }
             }
           }
@@ -164,11 +160,10 @@ export const useQuizStore = create<QuizState>()(
           const calculatedTraits: ToneTraits = { ...initialTraits };
           
           Object.entries(traitScores).forEach(([trait, scores]) => {
-            const traitKey = trait as keyof ToneTraits;
             if (scores.length > 0) {
               const sum = scores.reduce((acc, val) => acc + val, 0);
               const avg = sum / scores.length;
-              calculatedTraits[traitKey] = Math.max(-1, Math.min(1, avg));
+              calculatedTraits[trait as keyof ToneTraits] = Math.max(-1, Math.min(1, avg));
             }
           });
           
@@ -184,10 +179,10 @@ export const useQuizStore = create<QuizState>()(
       },
       
       updateTraits: (traits: ToneTraits) => {
-        set((state) => ({
-          traits: traits,
+        set({
+          traits,
           isComplete: true
-        }));
+        });
       },
       
       resetQuiz: () => {
@@ -199,6 +194,8 @@ export const useQuizStore = create<QuizState>()(
           error: null,
         });
       },
+      
+      setError: (error: string | null) => set({ error }),
     }),
     {
       name: 'tone-quiz',
