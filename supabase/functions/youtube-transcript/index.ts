@@ -1,4 +1,4 @@
-import { YoutubeTranscript } from 'npm:youtube-transcript@1.0.6';
+import { YoutubeTranscript } from 'npm:youtube-transcript';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,31 +36,9 @@ Deno.serve(async (req) => {
 
     while (attempts < maxAttempts) {
       try {
-        // Try to get the transcript list first to check availability
-        const transcriptList = await YoutubeTranscript.listTranscripts(videoId);
-        
-        try {
-          // Try to get English transcript first
-          transcript = await transcriptList.findTranscript(['en']);
-        } catch {
-          try {
-            // Try auto-generated English transcript
-            transcript = await transcriptList.findTranscript(['en-US', 'en-GB', 'en-AU']);
-          } catch {
-            // Try any available transcript and translate to English
-            const transcripts = await transcriptList.getTranscripts();
-            if (transcripts.length > 0) {
-              transcript = await transcripts[0].translate('en');
-            }
-          }
-        }
-
-        if (transcript) {
-          transcript = await transcript.fetch();
-          break;
-        }
-
-        throw new Error('No available transcripts found');
+        // Get the transcript directly
+        transcript = await YoutubeTranscript.fetchTranscript(videoId);
+        if (transcript) break;
       } catch (error) {
         attempts++;
         console.error(`Attempt ${attempts} failed:`, error);
