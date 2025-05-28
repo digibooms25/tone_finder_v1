@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Book, Sparkles, Brain, FileText, Youtube, Sliders, MessageSquare, Save, Share2 } from 'lucide-react';
+import { ArrowLeft, Book, Sparkles, Brain, FileText, Youtube, Sliders, MessageSquare, Save, Share2, RefreshCw, Bot } from 'lucide-react';
 
 const UserGuide: React.FC = () => {
   const navigate = useNavigate();
@@ -37,21 +37,21 @@ const UserGuide: React.FC = () => {
       icon: <MessageSquare size={24} />,
       content: [
         {
-          subtitle: 'With AI Assistants',
+          subtitle: 'Understanding Examples',
           steps: [
-            'Copy your tone prompt',
-            'Paste at the start of your AI conversation',
-            'Add your specific request',
-            'Get responses in your unique voice'
+            'Preview examples show bite-sized samples in different contexts',
+            'Use examples as quick reference for tone consistency',
+            'Test your tone prompt with longer content in AI platforms',
+            'Experiment with different writing scenarios'
           ]
         },
         {
           subtitle: 'Best Practices',
           steps: [
-            'Test with short samples first',
-            'Adjust tone settings if needed',
+            'Start with short samples to verify tone accuracy',
+            'Use longer conversations for better understanding',
             'Save different versions for different contexts',
-            'Use the preview examples as reference'
+            'Regularly update your tone as your style evolves'
           ]
         }
       ]
@@ -71,12 +71,12 @@ const UserGuide: React.FC = () => {
           ]
         },
         {
-          subtitle: 'Testing Changes',
+          subtitle: 'Editing & Saving',
           steps: [
-            'Use the regenerate button to update examples',
+            'Click regenerate to update and save changes in edit mode',
             'Review tone summary for accuracy',
-            'Check different writing scenarios',
-            'Save when satisfied'
+            'Check examples across different scenarios',
+            'New tones can be adjusted before saving'
           ]
         }
       ]
@@ -102,6 +102,31 @@ const UserGuide: React.FC = () => {
             'Keep professional and casual tones separate',
             'Update tones as your style evolves',
             'Share prompts with your team'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'ai-analysis',
+      title: 'Understanding AI Analysis',
+      icon: <Bot size={24} />,
+      content: [
+        {
+          subtitle: 'How It Works',
+          steps: [
+            'AI analyzes your writing patterns and communication style',
+            'Multiple data points are combined for comprehensive analysis',
+            'Advanced language models evaluate tone characteristics',
+            'Results are synthesized into actionable insights'
+          ]
+        },
+        {
+          subtitle: 'Analysis Transparency',
+          steps: [
+            'AI analysis provides estimated tone characteristics',
+            'Results may vary based on input quality and length',
+            'Regular updates help improve accuracy over time',
+            'Use examples and testing to verify tone accuracy'
           ]
         }
       ]
@@ -208,15 +233,15 @@ const UserGuide: React.FC = () => {
             </li>
             <li className="flex items-center gap-2">
               <span className="w-2 h-2 bg-white rounded-full" />
-              <span>Regularly update your tone as your communication style evolves</span>
+              <span>Test your tone with longer content in AI platforms</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="w-2 h-2 bg-white rounded-full" />
-              <span>Test your tone with various AI assistants to find the best fit</span>
+              <span>Use regenerate to save changes when editing</span>
             </li>
             <li className="flex items-center gap-2">
               <span className="w-2 h-2 bg-white rounded-full" />
-              <span>Use the preview examples as a quick reference for tone consistency</span>
+              <span>Remember that AI analysis is an estimate - verify through testing</span>
             </li>
           </ul>
         </motion.div>
