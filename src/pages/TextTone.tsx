@@ -42,10 +42,16 @@ const TextTone: React.FC = () => {
 
     setIsLoading(true);
     try {
+      // Score the text
       const traits = await scoreFreeTextResponse(text);
+      
+      // Update traits and set isComplete
       updateTraits(traits);
+      
+      // Navigate to results
       navigate('/results', { state: { fromQuiz: true } });
     } catch (error: any) {
+      console.error('Analysis error:', error);
       setError(error.message || 'An error occurred during analysis. Please try again.');
       setIsLoading(false);
     }

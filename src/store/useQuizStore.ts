@@ -19,16 +19,11 @@ type QuizState = {
   isComplete: boolean;
   error: string | null;
   
-  // Navigation
   nextQuestion: () => void;
   previousQuestion: () => void;
   goToQuestion: (index: number) => void;
   setCurrentQuestionIndex: (index: number) => void;
-  
-  // Answer management
   setAnswer: (questionId: string, answer: string | string[]) => void;
-  
-  // Scoring
   calculateTraits: () => Promise<ToneTraits>;
   updateTraits: (traits: Partial<ToneTraits>) => void;
   resetQuiz: () => void;
@@ -96,7 +91,7 @@ export const useQuizStore = create<QuizState>()(
       
       calculateTraits: async () => {
         const { answers } = get();
-        set({ error: null }); // Reset error state before calculation
+        set({ error: null });
         
         const traitScores: Record<keyof ToneTraits, number[]> = {
           formality: [],
@@ -157,13 +152,12 @@ export const useQuizStore = create<QuizState>()(
                 } catch (error) {
                   if (error instanceof OpenAIQuotaError) {
                     set({ 
-                      error: 'OpenAI API quota exceeded. Please try again in a few minutes. If the problem persists, you may need to check your OpenAI API plan limits.',
+                      error: 'OpenAI API quota exceeded. Please try again in a few minutes.',
                       isComplete: false 
                     });
-                    throw error; // Re-throw to handle in the UI
+                    throw error;
                   }
                   console.error('Error scoring free text:', error);
-                  // For other errors, continue with available scores
                 }
               }
             }
@@ -185,25 +179,27 @@ export const useQuizStore = create<QuizState>()(
           return calculatedTraits;
         } catch (error) {
           if (error instanceof OpenAIQuotaError) {
-            throw error; // Re-throw quota errors to be handled by the UI
+            throw error;
           }
           console.error('Error calculating traits:', error);
-          return { ...initialTraits };
+          throw error; // Propagate the error to be handled by the caller
         }
       },
       
-      updateTraits: (partialTraits: Partial<ToneTraits>) => {
+      updateTraits: (traits: Partial<ToneTraits>) => {
         set((state) => ({
           traits: {
             ...state.traits,
-            ...partialTraits,
+            ...traits,
           },
+          isComplete: true // Set isComplete to true when traits are updated directly
         }));
       },
       
       resetQuiz: () => {
         set({
           currentQuestionIndex: 0,
+          answers: {},
           isComplete: false,
           traits: { ...initialTraits },
           error: null,
