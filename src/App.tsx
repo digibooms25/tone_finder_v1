@@ -10,6 +10,7 @@ import TextTone from './pages/TextTone';
 import ChatGPTGuide from './pages/guides/ChatGPTGuide';
 import ClaudeGuide from './pages/guides/ClaudeGuide';
 import GeminiGuide from './pages/guides/GeminiGuide';
+import UserGuide from './pages/UserGuide';
 
 function App() {
   const { checkSession, loading } = useAuthStore();
@@ -41,6 +42,7 @@ function App() {
             <Route path="/guides/chatgpt" element={<ChatGPTGuide />} />
             <Route path="/guides/claude" element={<ClaudeGuide />} />
             <Route path="/guides/gemini" element={<GeminiGuide />} />
+            <Route path="/guide" element={<UserGuide />} />
           </Routes>
         </main>
       </div>
@@ -48,4 +50,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
