@@ -11,6 +11,7 @@ import ChatGPTGuide from './pages/guides/ChatGPTGuide';
 import ClaudeGuide from './pages/guides/ClaudeGuide';
 import GeminiGuide from './pages/guides/GeminiGuide';
 import UserGuide from './pages/UserGuide';
+import AccountSettings from './pages/AccountSettings';
 
 function App() {
   const { checkSession, loading } = useAuthStore();
@@ -43,6 +44,7 @@ function App() {
             <Route path="/guides/claude" element={<ClaudeGuide />} />
             <Route path="/guides/gemini" element={<GeminiGuide />} />
             <Route path="/guide" element={<UserGuide />} />
+            <Route path="/account" element={<AccountSettings />} />
           </Routes>
         </main>
       </div>

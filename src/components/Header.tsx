@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useQuizStore } from '../store/useQuizStore';
 import Button from './Button';
-import { LogIn, LogOut, Menu, X, PlusCircle, LayoutDashboard, FileText, Book } from 'lucide-react';
+import { LogIn, LogOut, Menu, X, PlusCircle, LayoutDashboard, FileText, Book, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
@@ -92,9 +92,13 @@ const Header: React.FC = () => {
             >
               <div className="container mx-auto px-4 flex flex-col gap-2">
                 {user && (
-                  <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100 mb-2">
-                    {user.email}
-                  </div>
+                  <button
+                    onClick={() => handleNavigation('/account')}
+                    className="flex items-center justify-between px-4 py-2 text-sm text-gray-500 border-b border-gray-100 mb-2 hover:bg-gray-50 w-full"
+                  >
+                    <span>{user.email}</span>
+                    <Settings size={16} />
+                  </button>
                 )}
                 
                 <button
