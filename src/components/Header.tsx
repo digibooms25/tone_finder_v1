@@ -48,7 +48,7 @@ const Header: React.FC = () => {
     <header className="bg-white shadow-sm relative z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link to="/" className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors">
-          Find Your Tone
+          toneofvoice.ai
         </Link>
         
         {/* Menu Button */}
