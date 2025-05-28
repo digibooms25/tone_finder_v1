@@ -69,14 +69,11 @@ export const useToneStore = create<ToneState>()(
       hasUnsavedChanges: () => {
         const { currentTone, savedTones } = get();
         
-        // If there's no ID, it's a new tone
         if (!currentTone.id) return false;
         
-        // Find the saved tone with matching ID
         const savedTone = savedTones.find(tone => tone.id === currentTone.id);
         if (!savedTone) return false;
         
-        // Compare current values with saved values
         return (
           currentTone.formality !== savedTone.formality ||
           currentTone.brevity !== savedTone.brevity ||
@@ -95,6 +92,8 @@ export const useToneStore = create<ToneState>()(
         try {
           set({ loading: true, error: null, isQuotaExceeded: false });
           const { currentTone } = get();
+          
+          // Extract current traits
           const traits = {
             formality: currentTone.formality,
             brevity: currentTone.brevity,
@@ -104,6 +103,7 @@ export const useToneStore = create<ToneState>()(
             expressiveness: currentTone.expressiveness,
           };
           
+          // Generate new content in parallel
           const [summaryResult, examplesResult] = await Promise.all([
             generateToneSummary(traits),
             generateToneExamples(traits),
@@ -113,20 +113,24 @@ export const useToneStore = create<ToneState>()(
             throw new Error('Failed to generate content. Please try again.');
           }
           
-          const updates = {
-            title: summaryResult.title,
-            summary: summaryResult.summary,
-            prompt: summaryResult.prompt,
-            examples: examplesResult,
-          };
+          // Update the current tone with new content
+          set(state => ({
+            currentTone: {
+              ...state.currentTone,
+              title: summaryResult.title,
+              summary: summaryResult.summary,
+              prompt: summaryResult.prompt,
+              examples: examplesResult,
+            },
+          }));
           
-          // If we're in edit mode, auto-save the changes
+          // If we're editing an existing tone, save the changes
           if (currentTone.id) {
             await get().updateTone(currentTone.id, {
-              name: updates.title,
-              summary: updates.summary,
-              prompt: updates.prompt,
-              examples: updates.examples,
+              name: summaryResult.title,
+              summary: summaryResult.summary,
+              prompt: summaryResult.prompt,
+              examples: examplesResult,
               formality: traits.formality,
               brevity: traits.brevity,
               humor: traits.humor,
@@ -135,13 +139,6 @@ export const useToneStore = create<ToneState>()(
               expressiveness: traits.expressiveness,
             });
           }
-          
-          set((state) => ({
-            currentTone: {
-              ...state.currentTone,
-              ...updates,
-            },
-          }));
         } catch (error) {
           if (error instanceof OpenAIQuotaError) {
             set({ 
