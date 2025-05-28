@@ -5,6 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -27,7 +29,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Add retries for transcript fetching
+    // Add retries for transcript fetching with exponential backoff
     let transcript;
     let attempts = 0;
     const maxAttempts = 3;
@@ -43,8 +45,10 @@ Deno.serve(async (req) => {
         if (attempts === maxAttempts) {
           throw error;
         }
-        // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts)));
+        // Exponential backoff with jitter
+        const baseDelay = 1000 * Math.pow(2, attempts);
+        const jitter = Math.random() * 1000;
+        await sleep(baseDelay + jitter);
       }
     }
     
@@ -70,6 +74,8 @@ Deno.serve(async (req) => {
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/(\w)\s+([.,!?])/g, '$1$2') // Fix spacing around punctuation
       .replace(/[^\w\s.,!?'-]/g, '') // Remove special characters except basic punctuation
+      .replace(/(\w)'(\w)/g, '$1$2') // Remove apostrophes between words
+      .replace(/\s+/g, ' ') // Final whitespace cleanup
       .trim();
 
     // Validate transcript length (approximately 2 minutes of speech)
@@ -102,7 +108,9 @@ Deno.serve(async (req) => {
     console.error('Transcript fetch error:', error);
 
     // Handle specific error types
-    if (error.message?.includes('Could not get transcripts') || error.message?.includes('No transcript available')) {
+    if (error.message?.includes('Could not get transcripts') || 
+        error.message?.includes('No transcript available') ||
+        error.message?.includes('Subtitles are disabled')) {
       return new Response(
         JSON.stringify({ 
           error: 'Transcript unavailable',
@@ -115,11 +123,13 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (error.message?.includes('Invalid video id') || error.message?.includes('Video id not found')) {
+    if (error.message?.includes('Invalid video id') || 
+        error.message?.includes('Video id not found') ||
+        error.message?.includes('Video unavailable')) {
       return new Response(
         JSON.stringify({ 
           error: 'Invalid video ID',
-          details: 'The provided YouTube URL is invalid. Please check the URL and try again.'
+          details: 'The provided YouTube URL is invalid or the video is unavailable. Please check the URL and try again.'
         }),
         { 
           status: 400, 
@@ -131,7 +141,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Failed to fetch transcript',
-        details: 'An unexpected error occurred. Please try again later.',
+        details: 'An unexpected error occurred while fetching the transcript. Please try again later.',
         message: error.message
       }),
       { 

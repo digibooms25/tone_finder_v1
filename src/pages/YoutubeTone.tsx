@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Youtube, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Youtube, AlertCircle, Link as LinkIcon } from 'lucide-react';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
 import { scoreFreeTextResponse } from '../lib/openai';
@@ -21,21 +21,35 @@ const YoutubeTone: React.FC = () => {
     return match ? match[1] : null;
   };
 
+  const validateUrl = (url: string) => {
+    if (!url.trim()) {
+      throw new Error('Please enter a YouTube URL');
+    }
+    
+    const videoId = extractVideoId(url);
+    if (!videoId) {
+      throw new Error('Invalid YouTube URL');
+    }
+    
+    return videoId;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setDetails(null);
     
-    const videoId = extractVideoId(url);
-    if (!videoId) {
-      setError('Invalid YouTube URL');
-      setDetails('Please enter a valid YouTube video URL');
+    let videoId;
+    try {
+      videoId = validateUrl(url);
+    } catch (error: any) {
+      setError(error.message);
+      setDetails('Please enter a valid YouTube video URL (e.g., https://www.youtube.com/watch?v=...)');
       return;
     }
 
     setIsLoading(true);
     try {
-      // Fetch transcript using the edge function
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/youtube-transcript`, {
         method: 'POST',
         headers: {
@@ -45,14 +59,19 @@ const YoutubeTone: React.FC = () => {
         body: JSON.stringify({ videoId }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch transcript');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to fetch transcript', { 
+          cause: data.details || 'An unexpected error occurred' 
+        });
       }
 
+      const data = await response.json();
+
       if (!data.transcript) {
-        throw new Error('No transcript available');
+        throw new Error('No transcript available', {
+          cause: 'The video transcript could not be retrieved. Please ensure the video has captions enabled.'
+        });
       }
 
       // Score the transcript
@@ -63,10 +82,7 @@ const YoutubeTone: React.FC = () => {
       navigate('/results', { state: { fromQuiz: true } });
     } catch (error: any) {
       setError(error.message);
-      // If the error response includes details, show them
-      if (error.details) {
-        setDetails(error.details);
-      }
+      setDetails(error.cause || 'Please try again or use a different video');
       setIsLoading(false);
     }
   };
@@ -106,7 +122,7 @@ const YoutubeTone: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-red-50 rounded-lg"
+              className="mb-6 p-4 bg-red-50 rounded-lg border border-red-100"
             >
               <div className="flex items-center gap-2 text-red-700 font-medium">
                 <AlertCircle size={20} />
@@ -123,18 +139,23 @@ const YoutubeTone: React.FC = () => {
               <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
                 YouTube Video URL
               </label>
-              <input
-                id="url"
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                  <LinkIcon size={16} className="text-gray-400" />
+                </div>
+                <input
+                  id="url"
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <h3 className="font-medium text-blue-900 mb-2">Requirements:</h3>
               <ul className="text-sm text-blue-800 space-y-1">
                 <li>• Video must have closed captions or subtitles</li>
