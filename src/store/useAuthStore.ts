@@ -121,25 +121,29 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true, error: null });
       
-      // Get the current user first
-      const { data: { user } } = await supabase.auth.getUser();
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!user) {
-        throw new Error('No user found');
+      if (!session) {
+        throw new Error('No active session found');
       }
 
-      // Delete user data first (RLS policies will handle this)
-      const { error: deleteError } = await supabase
-        .from('tone_profiles')
-        .delete()
-        .eq('user_id', user.id);
-      
-      if (deleteError) throw deleteError;
+      // Call the Edge Function to delete the user
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      // Delete the user account
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
-      
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete account');
+      }
 
       // Clear local state
       set({ user: null, error: null });
