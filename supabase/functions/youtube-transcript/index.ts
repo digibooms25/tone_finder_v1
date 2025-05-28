@@ -1,4 +1,4 @@
-import { YoutubeTranscript } from 'npm:youtube-transcript@1.0.6';
+import * as YoutubeTranscriptModule from 'npm:youtube-transcript@1.0.6';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     while (attempts < maxAttempts) {
       try {
         // Try to get the transcript list first to check availability
-        const transcriptList = await YoutubeTranscript.listTranscripts(videoId);
+        const transcriptList = await YoutubeTranscriptModule.YoutubeTranscript.listTranscripts(videoId);
         
         try {
           // Try to get English transcript first
