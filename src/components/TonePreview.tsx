@@ -12,18 +12,19 @@ const TonePreview: React.FC<TonePreviewProps> = ({ examples = [] }) => {
     'Professional Email',
     'Social Media Post',
     'Customer Service',
+    'Creative Writing'
   ];
   
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Tone in Action</h3>
       
-      <div className="flex border-b mb-4">
+      <div className="flex border-b mb-4 overflow-x-auto">
         {previewTypes.map((type, index) => (
           <button
             key={index}
             onClick={() => setActiveTab(index)}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
+            className={`px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
               activeTab === index
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
@@ -42,7 +43,7 @@ const TonePreview: React.FC<TonePreviewProps> = ({ examples = [] }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="text-gray-700"
+            className="text-gray-700 whitespace-pre-line"
           >
             {examples[activeTab]}
           </motion.div>
