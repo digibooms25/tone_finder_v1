@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, AlertTriangle, User } from 'lucide-react';
@@ -12,6 +12,13 @@ const AccountSettings: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Redirect to home if not authenticated
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
   const handleDelete = async () => {
     setIsDeleting(true);
     setError(null);
@@ -23,6 +30,11 @@ const AccountSettings: React.FC = () => {
       setIsDeleting(false);
     }
   };
+
+  // Don't render anything if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
