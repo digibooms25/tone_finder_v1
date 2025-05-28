@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToneProfile } from '../lib/supabase';
 import Button from './Button';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
 import { MoreVertical, Edit2, Trash2, Copy, Files, ChevronDown, ChevronUp, Check, X } from 'lucide-react';
 
 interface ToneCardProps {
@@ -27,6 +28,7 @@ const ToneCard: React.FC<ToneCardProps> = ({
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(tone.name);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -61,14 +63,13 @@ const ToneCard: React.FC<ToneCardProps> = ({
   };
 
   const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete "${tone.name}"?`)) {
-      setIsDeleting(true);
-      try {
-        await onDelete(tone.id);
-      } finally {
-        setIsDeleting(false);
-        setShowMenu(false);
-      }
+    setIsDeleting(true);
+    try {
+      await onDelete(tone.id);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setShowMenu(false);
     }
   };
   
@@ -235,12 +236,14 @@ const ToneCard: React.FC<ToneCardProps> = ({
                   {isDuplicating ? 'Duplicating...' : 'Duplicate'}
                 </button>
                 <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
+                  onClick={() => {
+                    setShowDeleteConfirm(true);
+                    setShowMenu(false);
+                  }}
                   className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                 >
                   <Trash2 size={14} />
-                  {isDeleting ? 'Deleting...' : 'Delete'}
+                  Delete
                 </button>
               </motion.div>
             )}
@@ -298,6 +301,14 @@ const ToneCard: React.FC<ToneCardProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <DeleteConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        itemName={tone.name}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };
