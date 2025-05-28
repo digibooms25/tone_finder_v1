@@ -78,19 +78,21 @@ const Dashboard: React.FC = () => {
           <p className="text-gray-600 mb-8 leading-relaxed">
             Take our quick tone test to understand your unique writing style. Get personalized insights and a custom prompt you can use with any AI writing assistant.
           </p>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Button
-              onClick={handleNewTone}
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-xl"
-              icon={<PlusCircle size={20} />}
+          <div className="flex justify-center">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              Start Tone Test
-            </Button>
-          </motion.div>
+              <Button
+                onClick={handleNewTone}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-xl"
+                icon={<PlusCircle size={20} />}
+              >
+                Start Tone Test
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>
