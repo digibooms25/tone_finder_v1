@@ -35,8 +35,8 @@ const TextTone: React.FC = () => {
       return;
     }
 
-    if (wordCount > 600) {
-      setError('Please limit your text to 600 words.');
+    if (wordCount > 1000) {
+      setError('Please limit your text to 1000 words.');
       return;
     }
 
@@ -110,11 +110,11 @@ const TextTone: React.FC = () => {
                 required
               />
               <div className="mt-2 flex justify-between items-center text-sm">
-                <span className={wordCount > 600 ? 'text-red-500' : 'text-gray-500'}>
-                  {wordCount} words
+                <span className={`font-medium ${wordCount > 1000 ? 'text-red-500' : 'text-gray-700'}`}>
+                  {wordCount}/1000 words
                 </span>
                 <span className="text-gray-500">
-                  {wordCount < 50 ? '50 words minimum' : wordCount > 600 ? '600 words maximum' : ''}
+                  {wordCount < 50 ? '50 words minimum' : wordCount > 1000 ? '1000 words maximum' : ''}
                 </span>
               </div>
             </div>
@@ -134,7 +134,7 @@ const TextTone: React.FC = () => {
               isLoading={isLoading}
               className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800"
               icon={<FileText size={18} />}
-              disabled={wordCount < 50 || wordCount > 600}
+              disabled={wordCount < 50 || wordCount > 1000}
             >
               Analyze Text
             </Button>
