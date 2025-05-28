@@ -25,7 +25,7 @@ type QuizState = {
   setCurrentQuestionIndex: (index: number) => void;
   setAnswer: (questionId: string, answer: string | string[]) => void;
   calculateTraits: () => Promise<ToneTraits>;
-  updateTraits: (traits: Partial<ToneTraits>) => void;
+  updateTraits: (traits: ToneTraits) => void;
   resetQuiz: () => void;
   setError: (error: string | null) => void;
 };
@@ -50,7 +50,6 @@ export const useQuizStore = create<QuizState>()(
       
       nextQuestion: () => {
         const { currentQuestionIndex } = get();
-        
         if (currentQuestionIndex < questions.length - 1) {
           set({ currentQuestionIndex: currentQuestionIndex + 1 });
         } else {
@@ -60,7 +59,6 @@ export const useQuizStore = create<QuizState>()(
       
       previousQuestion: () => {
         const { currentQuestionIndex } = get();
-        
         if (currentQuestionIndex > 0) {
           set({ currentQuestionIndex: currentQuestionIndex - 1 });
         }
@@ -106,7 +104,6 @@ export const useQuizStore = create<QuizState>()(
           // Process choice and multi_select questions
           for (const question of questions) {
             const answer = answers[question.id];
-            
             if (!answer) continue;
             
             if (question.type === 'choice') {
@@ -163,7 +160,7 @@ export const useQuizStore = create<QuizState>()(
             }
           }
           
-          // Calculate final trait values (average and clamp between -1 and 1)
+          // Calculate final trait values
           const calculatedTraits: ToneTraits = { ...initialTraits };
           
           Object.entries(traitScores).forEach(([trait, scores]) => {
@@ -186,12 +183,9 @@ export const useQuizStore = create<QuizState>()(
         }
       },
       
-      updateTraits: (traits: Partial<ToneTraits>) => {
+      updateTraits: (traits: ToneTraits) => {
         set((state) => ({
-          traits: {
-            ...state.traits,
-            ...traits,
-          },
+          traits: traits,
           isComplete: true
         }));
       },

@@ -11,7 +11,7 @@ import AnalyzingLoader from '../components/AnalyzingLoader';
 const TextTone: React.FC = () => {
   const navigate = useNavigate();
   const { updateTraits } = useQuizStore();
-  const { generateContent } = useToneStore();
+  const { generateContent, resetCurrentTone } = useToneStore();
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,21 +44,23 @@ const TextTone: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Score the text
+      // Reset any previous tone data
+      resetCurrentTone();
+      
+      // Score the text first
       const traits = await scoreFreeTextResponse(text);
       
-      // Update traits
+      // Update traits in store
       updateTraits(traits);
       
-      // Generate content before navigation
+      // Generate content based on traits
       await generateContent();
       
-      // Navigate to results
+      // Only navigate after content is generated
       navigate('/results');
     } catch (error: any) {
       console.error('Analysis error:', error);
       setError(error.message || 'An error occurred during analysis. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
