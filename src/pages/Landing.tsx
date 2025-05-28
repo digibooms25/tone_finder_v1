@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
-import { Brain, Sliders, Wand2, ArrowRight, Sparkles, MessageSquare, Youtube } from 'lucide-react';
+import { Brain, Sliders, Wand2, ArrowRight, Sparkles, MessageSquare, Youtube, FileText, PenTool } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ const Landing: React.FC = () => {
               size="lg"
               onClick={handleStartTest}
               className="px-12 py-6 text-lg shadow-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-300"
-              icon={<ArrowRight className="ml-2\" size={24} />}
+              icon={<ArrowRight className="ml-2" size={24} />}
               iconPosition="right"
             >
               Start Tone Test
@@ -90,48 +90,46 @@ const Landing: React.FC = () => {
           </motion.h2>
 
           <motion.div
-            className="grid md:grid-cols-2 gap-6"
+            className="grid md:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <motion.div
-              className="relative group cursor-pointer"
-              onClick={() => navigate('/youtube')}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="h-full p-8 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-xl">
-                <div className="relative text-white">
-                  <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6">
-                    <Youtube size={32} />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">Extract Tone from YouTube Video</h3>
-                  <p className="leading-relaxed mb-6 opacity-90">
-                    Analyze your speaking style from any YouTube video with captions. Perfect for capturing your natural voice.
-                  </p>
-                  <div className="flex items-center font-medium">
-                    <span>Try Video Analysis</span>
-                    <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+            {[
+              {
+                icon: <Youtube size={32} />,
+                title: "Extract from YouTube Video",
+                description: "Analyze your speaking style from any YouTube video with captions.",
+                gradient: "from-red-500 to-red-600"
+              },
+              {
+                icon: <FileText size={32} />,
+                title: "Turn Blog Post into Your Tone",
+                description: "Convert your existing writing into a reusable tone profile.",
+                gradient: "from-emerald-500 to-emerald-600"
+              },
+              {
+                icon: <PenTool size={32} />,
+                title: "Write Your Own Text",
+                description: "Create a tone profile from your custom writing sample.",
+                gradient: "from-purple-500 to-purple-600"
+              }
+            ].map((method, index) => (
+              <div key={index} className="opacity-50 cursor-not-allowed">
+                <div className={`h-full p-8 rounded-2xl bg-gradient-to-br ${method.gradient} shadow-xl`}>
+                  <div className="relative text-white">
+                    <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6">
+                      {method.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4">{method.title}</h3>
+                    <p className="leading-relaxed mb-6 opacity-90">{method.description}</p>
+                    <div className="flex items-center font-medium">
+                      <span>Coming Soon</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </motion.div>
-
-            {/* Placeholder for future methods */}
-            <div className="opacity-50 cursor-not-allowed">
-              <div className="h-full p-8 rounded-2xl bg-gradient-to-br from-gray-500 to-gray-600 shadow-xl">
-                <div className="relative text-white">
-                  <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl inline-block mb-6">
-                    <MessageSquare size={32} />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4">More Coming Soon</h3>
-                  <p className="leading-relaxed mb-6 opacity-90">
-                    We're working on additional ways to help you discover and create your perfect tone.
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </motion.div>
         </div>
       </section>
