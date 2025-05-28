@@ -19,7 +19,12 @@ const TonePreview: React.FC<TonePreviewProps> = ({ examples = [] }) => {
   
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">Your Tone in Action</h3>
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-2 text-gray-800">Your Tone in Action</h3>
+        <p className="text-sm text-gray-600">
+          These bite-sized samples demonstrate your tone across different contexts. For longer content, we recommend testing your tone prompt with your preferred AI platform.
+        </p>
+      </div>
       
       <div className="relative mb-4">
         <button
