@@ -102,7 +102,7 @@ const Header: React.FC = () => {
                   className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                 >
                   <FileText size={16} />
-                  Text Analysis
+                  Text-to-Tone
                 </button>
                 
                 {user ? (
