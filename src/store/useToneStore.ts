@@ -64,27 +64,13 @@ export const useToneStore = create<ToneState>()(
       isQuotaExceeded: false,
       pendingSave: false,
       
-      setPendingSave: (pendingSave: boolean) => set({ pendingSave }),
-      
-      hasUnsavedChanges: () => {
-        const { currentTone, savedTones } = get();
-        if (!currentTone.id) return false;
-        
-        const savedTone = savedTones.find(tone => tone.id === currentTone.id);
-        if (!savedTone) return false;
-        
-        return (
-          currentTone.formality !== savedTone.formality ||
-          currentTone.brevity !== savedTone.brevity ||
-          currentTone.humor !== savedTone.humor ||
-          currentTone.warmth !== savedTone.warmth ||
-          currentTone.directness !== savedTone.directness ||
-          currentTone.expressiveness !== savedTone.expressiveness ||
-          currentTone.title !== savedTone.name ||
-          currentTone.summary !== savedTone.summary ||
-          currentTone.prompt !== savedTone.prompt ||
-          JSON.stringify(currentTone.examples) !== JSON.stringify(savedTone.examples)
-        );
+      setCurrentToneTraits: (traits) => {
+        set((state) => ({
+          currentTone: {
+            ...state.currentTone,
+            ...traits,
+          },
+        }));
       },
       
       generateContent: async () => {
@@ -110,7 +96,7 @@ export const useToneStore = create<ToneState>()(
             throw new Error('Failed to generate content. Please try again.');
           }
           
-          set(state => ({
+          set((state) => ({
             currentTone: {
               ...state.currentTone,
               title: summaryResult.title,
@@ -126,12 +112,7 @@ export const useToneStore = create<ToneState>()(
               summary: summaryResult.summary,
               prompt: summaryResult.prompt,
               examples: examplesResult,
-              formality: traits.formality,
-              brevity: traits.brevity,
-              humor: traits.humor,
-              warmth: traits.warmth,
-              directness: traits.directness,
-              expressiveness: traits.expressiveness,
+              ...traits,
             });
           }
         } catch (error) {
@@ -149,9 +130,7 @@ export const useToneStore = create<ToneState>()(
         }
       },
       
-      clearError: () => {
-        set({ error: null, isQuotaExceeded: false });
-      },
+      clearError: () => set({ error: null, isQuotaExceeded: false }),
       
       saveTone: async (name: string, userId: string) => {
         try {
@@ -302,15 +281,6 @@ export const useToneStore = create<ToneState>()(
         }
       },
       
-      setCurrentToneTraits: (traits) => {
-        set((state) => ({
-          currentTone: {
-            ...state.currentTone,
-            ...traits,
-          },
-        }));
-      },
-      
       setCurrentToneFromProfile: (tone) => {
         set({
           currentTone: {
@@ -335,6 +305,29 @@ export const useToneStore = create<ToneState>()(
           error: null,
           isQuotaExceeded: false,
         });
+      },
+      
+      setPendingSave: (pendingSave: boolean) => set({ pendingSave }),
+      
+      hasUnsavedChanges: () => {
+        const { currentTone, savedTones } = get();
+        if (!currentTone.id) return false;
+        
+        const savedTone = savedTones.find(tone => tone.id === currentTone.id);
+        if (!savedTone) return false;
+        
+        return (
+          currentTone.formality !== savedTone.formality ||
+          currentTone.brevity !== savedTone.brevity ||
+          currentTone.humor !== savedTone.humor ||
+          currentTone.warmth !== savedTone.warmth ||
+          currentTone.directness !== savedTone.directness ||
+          currentTone.expressiveness !== savedTone.expressiveness ||
+          currentTone.title !== savedTone.name ||
+          currentTone.summary !== savedTone.summary ||
+          currentTone.prompt !== savedTone.prompt ||
+          JSON.stringify(currentTone.examples) !== JSON.stringify(savedTone.examples)
+        );
       },
     }),
     {
