@@ -131,7 +131,7 @@ const Header: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
                     <LogIn size={16} />
-                    Sign In
+                    Sign In / Create Account
                   </button>
                 )}
               </div>
@@ -151,7 +151,7 @@ const Header: React.FC = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+                  {authMode === 'signin' ? 'Welcome Back!' : 'Create Your Account'}
                 </h2>
                 <button
                   onClick={() => setShowAuthModal(false)}
@@ -159,6 +159,14 @@ const Header: React.FC = () => {
                 >
                   ✕
                 </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600">
+                  {authMode === 'signin' 
+                    ? 'Sign in to save your tones and access them from anywhere.'
+                    : 'Create an account to save your tones and access them from any device.'}
+                </p>
               </div>
               
               <AuthForm mode={authMode} onSuccess={handleAuthSuccess} />
@@ -171,7 +179,7 @@ const Header: React.FC = () => {
                       onClick={() => setAuthMode('signup')}
                       className="text-blue-600 hover:underline"
                     >
-                      Sign Up
+                      Create Account
                     </button>
                   </p>
                 ) : (
