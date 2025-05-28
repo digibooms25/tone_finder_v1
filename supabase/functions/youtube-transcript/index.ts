@@ -1,4 +1,4 @@
-import * as YoutubeTranscriptModule from 'npm:youtube-transcript@1.0.6';
+import { YoutubeTranscript } from 'npm:youtube-transcript@1.0.6';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     while (attempts < maxAttempts) {
       try {
         // First check if captions are available
-        const transcriptList = await YoutubeTranscriptModule.YoutubeTranscript.getSubtitles({ videoId });
+        const transcriptList = await YoutubeTranscript.getSubtitles({ videoId });
         
         if (transcriptList && transcriptList.length > 0) {
           transcript = transcriptList;
