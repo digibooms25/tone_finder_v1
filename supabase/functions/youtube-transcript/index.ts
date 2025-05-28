@@ -22,10 +22,10 @@ serve(async (req) => {
       `https://www.youtube.com/api/timedtext?` +
       new URLSearchParams({ v: videoId, lang, fmt: "json3" })
     );
-    if (!ytRes.ok) throw new Error(`YouTube returned ${ytRes.status}`);
+    if (!ytRes.ok) throw new Error(`YouTube API request failed with status ${ytRes.status}`);
 
-    const { events } = await ytRes.json();
-    if (!events || events.length === 0) {
+    const data = await ytRes.json();
+    if (!data || !data.events || data.events.length === 0) {
       return new Response(
         JSON.stringify({ 
           error: 'No transcript available',
@@ -39,7 +39,7 @@ serve(async (req) => {
     }
 
     // Combine all transcript segments into a single text
-    const fullTranscript = events
+    const fullTranscript = data.events
       .map((e: any) => e.segs.map((s: any) => s.utf8).join(""))
       .join(" ")
       // Clean up common transcript artifacts
@@ -81,27 +81,17 @@ serve(async (req) => {
   } catch (err: any) {
     console.error("Transcript fetch error:", err);
     
-    if (err.message?.includes('Missing videoId')) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Video ID is required',
-          details: 'Please provide a valid YouTube video URL'
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
+    // Standardize error response structure with safe error messages
+    const errorResponse = {
+      error: 'Failed to fetch transcript',
+      details: 'An unexpected error occurred while fetching the transcript. Please try again later.',
+      code: err.message === 'Missing videoId' ? 'MISSING_VIDEO_ID' : 'FETCH_ERROR'
+    };
 
     return new Response(
-      JSON.stringify({ 
-        error: 'Failed to fetch transcript',
-        details: 'An unexpected error occurred while fetching the transcript. Please try again later.',
-        message: err.message
-      }),
+      JSON.stringify(errorResponse),
       { 
-        status: 500, 
+        status: err.message === 'Missing videoId' ? 400 : 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
