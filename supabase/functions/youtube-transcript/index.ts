@@ -37,11 +37,9 @@ Deno.serve(async (req) => {
 
     while (attempts < maxAttempts) {
       try {
-        // First check if captions are available
-        const transcriptList = await YoutubeTranscript.fetchTranscript(videoId);
+        transcript = await YoutubeTranscript.fetchTranscript(videoId);
         
-        if (transcriptList && transcriptList.length > 0) {
-          transcript = transcriptList;
+        if (transcript && transcript.length > 0) {
           break;
         }
 
