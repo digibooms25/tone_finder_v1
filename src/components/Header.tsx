@@ -56,7 +56,6 @@ const Header: React.FC = () => {
           </span>
         </div>
         
-        {/* Menu Button */}
         <button
           onClick={() => setShowMenu(!showMenu)}
           className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
@@ -64,7 +63,6 @@ const Header: React.FC = () => {
           {showMenu ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        {/* Menu Overlay */}
         <AnimatePresence>
           {showMenu && (
             <motion.div
@@ -140,59 +138,61 @@ const Header: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* Auth Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-md"
           >
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {authMode === 'signin' ? 'Welcome Back!' : 'Create Your Account'}
-                </h2>
-                <button
-                  onClick={() => setShowAuthModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="mb-6">
-                <p className="text-gray-600">
-                  {authMode === 'signin' 
-                    ? 'Sign in to save your tones and access them from anywhere.'
-                    : 'Create an account to save your tones and access them from any device.'}
-                </p>
-              </div>
-              
-              <AuthForm mode={authMode} onSuccess={handleAuthSuccess} />
-              
-              <div className="mt-4 text-center text-sm">
-                {authMode === 'signin' ? (
-                  <p>
-                    Don't have an account?{' '}
-                    <button
-                      onClick={() => setAuthMode('signup')}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Create Account
-                    </button>
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {authMode === 'signin' ? 'Welcome Back!' : 'Create Your Account'}
+                  </h2>
+                  <button
+                    onClick={() => setShowAuthModal(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="mb-6">
+                  <p className="text-gray-600">
+                    {authMode === 'signin' 
+                      ? 'Sign in to save your tones and access them from anywhere.'
+                      : 'Create an account to save your tones and access them from any device.'}
                   </p>
-                ) : (
-                  <p>
-                    Already have an account?{' '}
-                    <button
-                      onClick={() => setAuthMode('signin')}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Sign In
-                    </button>
-                  </p>
-                )}
+                </div>
+                
+                <AuthForm mode={authMode} onSuccess={handleAuthSuccess} />
+                
+                <div className="mt-4 text-center text-sm">
+                  {authMode === 'signin' ? (
+                    <p>
+                      Don't have an account?{' '}
+                      <button
+                        onClick={() => setAuthMode('signup')}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Create Account
+                      </button>
+                    </p>
+                  ) : (
+                    <p>
+                      Already have an account?{' '}
+                      <button
+                        onClick={() => setAuthMode('signin')}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Sign In
+                      </button>
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
