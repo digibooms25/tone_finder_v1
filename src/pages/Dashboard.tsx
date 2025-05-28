@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useToneStore } from '../store/useToneStore';
 import { useAuthStore } from '../store/useAuthStore';
 import ToneCard from '../components/ToneCard';
 import Button from '../components/Button';
-import { PlusCircle, Sparkles, Brain, Wand2 } from 'lucide-react';
+import { PlusCircle, Sparkles, Brain, Wand2, ChevronDown, FileText } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +20,7 @@ const Dashboard: React.FC = () => {
   } = useToneStore();
   const { user } = useAuthStore();
   const [message, setMessage] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -53,6 +54,11 @@ const Dashboard: React.FC = () => {
     await updateTone(id, { name: newName });
     setMessage('Tone renamed successfully!');
     setTimeout(() => setMessage(''), 3000);
+  };
+
+  const handleOptionSelect = (path: string) => {
+    setShowDropdown(false);
+    navigate(path);
   };
   
   const handleNewTone = () => {
@@ -100,7 +106,6 @@ const Dashboard: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-100/30 to-transparent rounded-full blur-3xl transform rotate-12" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-purple-100/30 to-transparent rounded-full blur-3xl transform -rotate-12" />
@@ -146,15 +151,43 @@ const Dashboard: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
+            className="relative"
           >
             <Button
               variant="primary"
               icon={<PlusCircle size={18} />}
-              onClick={handleNewTone}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg flex items-center gap-2"
             >
               New Tone
+              <ChevronDown size={16} className={`ml-1 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
             </Button>
+
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 z-50"
+                >
+                  <button
+                    onClick={() => handleOptionSelect('/quiz')}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <Brain size={16} />
+                    Tone Test
+                  </button>
+                  <button
+                    onClick={() => handleOptionSelect('/text')}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  >
+                    <FileText size={16} />
+                    Text Analysis
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
         
