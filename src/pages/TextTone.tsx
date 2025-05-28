@@ -4,12 +4,14 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, FileText, AlertCircle } from 'lucide-react';
 import Button from '../components/Button';
 import { useQuizStore } from '../store/useQuizStore';
+import { useToneStore } from '../store/useToneStore';
 import { scoreFreeTextResponse } from '../lib/openai';
 import AnalyzingLoader from '../components/AnalyzingLoader';
 
 const TextTone: React.FC = () => {
   const navigate = useNavigate();
   const { updateTraits } = useQuizStore();
+  const { generateContent } = useToneStore();
   const [text, setText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,14 +47,18 @@ const TextTone: React.FC = () => {
       // Score the text
       const traits = await scoreFreeTextResponse(text);
       
-      // Update traits and set isComplete
+      // Update traits
       updateTraits(traits);
       
+      // Generate content before navigation
+      await generateContent();
+      
       // Navigate to results
-      navigate('/results', { state: { fromQuiz: true } });
+      navigate('/results');
     } catch (error: any) {
       console.error('Analysis error:', error);
       setError(error.message || 'An error occurred during analysis. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
