@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuthStore } from './store/useAuthStore';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Landing from './pages/Landing';
 import Quiz from './pages/Quiz';
 import Results from './pages/Results';
@@ -49,6 +50,7 @@ function App() {
             <Route path="/account" element={<AccountSettings />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </Router>
   );
