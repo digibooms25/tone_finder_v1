@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center">
           <div className="text-gray-600 text-sm">
-            Vibe-coded by Digib 2025 copyrights
+            Vibe-coded by Digib 2025 ©
           </div>
           <div className="flex gap-6">
             <Link to="/blog" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
