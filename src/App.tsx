@@ -7,6 +7,7 @@ import Quiz from './pages/Quiz';
 import Results from './pages/Results';
 import Dashboard from './pages/Dashboard';
 import TextTone from './pages/TextTone';
+import Blog from './pages/Blog';
 import ChatGPTGuide from './pages/guides/ChatGPTGuide';
 import ClaudeGuide from './pages/guides/ClaudeGuide';
 import GeminiGuide from './pages/guides/GeminiGuide';
@@ -37,6 +38,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/text" element={<TextTone />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/results" element={<Results />} />
             <Route path="/edit/:toneId" element={<Results />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -51,5 +53,3 @@ function App() {
     </Router>
   );
 }
-
-export default App;
