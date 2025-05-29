@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -7,6 +8,14 @@ const Footer: React.FC = () => {
         <div className="flex justify-between items-center">
           <div className="text-gray-600 text-sm">
             Vibe-coded by Digib 2025 copyrights
+          </div>
+          <div className="flex gap-6">
+            <Link to="/blog" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
+              Blog
+            </Link>
+            <Link to="/guide" className="text-gray-600 hover:text-blue-600 text-sm transition-colors">
+              User Guide
+            </Link>
           </div>
         </div>
       </div>

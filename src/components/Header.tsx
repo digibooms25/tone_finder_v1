@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useQuizStore } from '../store/useQuizStore';
 import Button from './Button';
-import { LogIn, LogOut, Menu, X, PlusCircle, LayoutDashboard, FileText, Book, Settings, BookOpen } from 'lucide-react';
+import { LogIn, LogOut, Menu, X, PlusCircle, LayoutDashboard, FileText, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
@@ -123,22 +123,6 @@ const Header: React.FC = () => {
                 >
                   <FileText size={16} />
                   Text-to-Tone
-                </button>
-
-                <button
-                  onClick={() => handleNavigation('/blog')}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                >
-                  <BookOpen size={16} />
-                  Blog
-                </button>
-
-                <button
-                  onClick={() => handleNavigation('/guide')}
-                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                >
-                  <Book size={16} />
-                  User Guide
                 </button>
                 
                 {user ? (
