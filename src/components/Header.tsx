@@ -7,11 +7,10 @@ import { LogIn, LogOut, Menu, X, PlusCircle, LayoutDashboard, FileText, Book, Se
 import { motion, AnimatePresence } from 'framer-motion';
 import AuthForm from './AuthForm';
 
-// ... rest of the imports
-
 const Header: React.FC = () => {
-  // ... existing state and hooks
-
+  const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
+  
   return (
     <header className="bg-white shadow-sm relative z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
