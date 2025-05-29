@@ -162,10 +162,10 @@ const Blog: React.FC = () => {
             <div className="bg-gray-50 p-6 rounded-xl mt-12">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Sources:</h3>
               <ul className="space-y-2 text-gray-600 text-sm">
-                <li>• <a href="https://www.microsoft.com/en-us/worklab/work-trend-index/ai-at-work-is-here-now-comes-the-hard-part" className="text-blue-600 hover:text-blue-800 transition-colors">Microsoft Work Trend Index, 2024</a></li>
-                <li>• <a href="https://blog.hubspot.com/marketing/state-of-generative-ai" className="text-blue-600 hover:text-blue-800 transition-colors">HubSpot State of AI, 2024</a></li>
-                <li>• <a href="https://www.reuters.com/technology/artificial-intelligence/openai-says-chatgpts-weekly-users-have-grown-200-million-2024-08-29/" className="text-blue-600 hover:text-blue-800 transition-colors">Reuters, Jan 2024</a></li>
-                <li>• <a href="https://www.edelman.com/trust/2024/trust-barometer" className="text-blue-600 hover:text-blue-800 transition-colors">Edelman Trust Barometer, 2024</a></li>
+                <li>• <a href="https://www.microsoft.com/en-us/worklab/work-trend-index/ai-at-work-is-here-now-comes-the-hard-part" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors">Microsoft Work Trend Index, 2024</a></li>
+                <li>• <a href="https://blog.hubspot.com/marketing/state-of-generative-ai" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors">HubSpot State of AI, 2024</a></li>
+                <li>• <a href="https://www.reuters.com/technology/artificial-intelligence/openai-says-chatgpts-weekly-users-have-grown-200-million-2024-08-29/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors">Reuters, Jan 2024</a></li>
+                <li>• <a href="https://www.edelman.com/trust/2024/trust-barometer" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 transition-colors">Edelman Trust Barometer, 2024</a></li>
               </ul>
             </div>
 
