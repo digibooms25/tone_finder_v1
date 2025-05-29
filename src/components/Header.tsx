@@ -114,7 +114,7 @@ const Header: React.FC = () => {
                   className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
                 >
                   <PlusCircle size={16} />
-                  New Tone
+                  New Tone Test
                 </button>
 
                 <button
