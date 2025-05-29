@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, Share2, Copy } from 'lucide-react';
+import { ArrowLeft, FileText, Share2, Copy, Check } from 'lucide-react';
 import Button from '../components/Button';
 
 const Blog: React.FC = () => {
   const navigate = useNavigate();
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+  const [showShareFallback, setShowShareFallback] = useState(false);
 
   const handleShare = async () => {
     if (!navigator.share) {
-      // Fallback for browsers that don't support the Web Share API
-      alert('Sharing is not supported in your browser. You can copy the URL manually.');
+      setShowShareFallback(true);
       return;
     }
 
@@ -21,12 +22,22 @@ const Blog: React.FC = () => {
       });
     } catch (error) {
       if (error instanceof Error) {
-        // Only show error message if it's not a user cancellation
+        // Only show fallback if it's not a user cancellation
         if (error.name !== 'AbortError') {
-          console.error('Error sharing:', error);
-          alert('Failed to share. You can copy the URL manually.');
+          setShowShareFallback(true);
         }
       }
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setShowCopySuccess(true);
+      setShowShareFallback(false);
+      setTimeout(() => setShowCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
   };
 
@@ -178,7 +189,7 @@ const Blog: React.FC = () => {
           </div>
         </article>
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center relative">
           <Button
             onClick={() => navigate('/quiz')}
             className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
@@ -186,13 +197,37 @@ const Blog: React.FC = () => {
             Find Your Voice
           </Button>
 
-          <button
-            onClick={handleShare}
-            className="p-2 text-gray-600 hover:text-blue-600 rounded-full transition-colors"
-            title="Share article"
-          >
-            <Share2 size={20} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={handleShare}
+              className="p-2 text-gray-600 hover:text-blue-600 rounded-full transition-colors"
+              title="Share article"
+            >
+              <Share2 size={20} />
+            </button>
+
+            {/* Share fallback popup */}
+            {showShareFallback && (
+              <div className="absolute right-0 bottom-full mb-2 bg-white rounded-lg shadow-lg p-3 min-w-[200px]">
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                >
+                  {showCopySuccess ? (
+                    <>
+                      <Check size={16} className="text-green-500" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={16} />
+                      <span>Copy link</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
