@@ -7,6 +7,29 @@ import Button from '../components/Button';
 const Blog: React.FC = () => {
   const navigate = useNavigate();
 
+  const handleShare = async () => {
+    if (!navigator.share) {
+      // Fallback for browsers that don't support the Web Share API
+      alert('Sharing is not supported in your browser. You can copy the URL manually.');
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: 'Why Having Your Own Tone of Voice in the Age of AI Is Basically a Superpower',
+        url: window.location.href
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        // Only show error message if it's not a user cancellation
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+          alert('Failed to share. You can copy the URL manually.');
+        }
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 py-12 relative">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -164,12 +187,7 @@ const Blog: React.FC = () => {
           </Button>
 
           <button
-            onClick={() => {
-              navigator.share({
-                title: 'Why Having Your Own Tone of Voice in the Age of AI Is Basically a Superpower',
-                url: window.location.href
-              });
-            }}
+            onClick={handleShare}
             className="p-2 text-gray-600 hover:text-blue-600 rounded-full transition-colors"
             title="Share article"
           >
