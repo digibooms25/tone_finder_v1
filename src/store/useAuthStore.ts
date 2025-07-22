@@ -96,6 +96,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
+        await supabase.auth.signOut();
         set({ user: null, error: null });
         return;
       }
